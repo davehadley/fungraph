@@ -1,6 +1,6 @@
-# graci
+# funstash
 
-**Gr**aph of lazily evaluated functions with **A**utomatically **C**ached **I**ntermediates.
+Lazily evaluated mutable graph of functions with automatically cached intermediate values. 
 
 Features include:
 * Compose a Directed Acyclic Graph (DAG) of lazily evaluated functions.

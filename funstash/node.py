@@ -8,7 +8,7 @@ import graphchain
 import dask
 from dask import delayed
 
-from graci.internal.util import ziporraise
+from funstash.internal.util import ziporraise
 
 
 def _context() -> dask.config.set:
@@ -154,7 +154,7 @@ class Node:
     def __call__(self):
         return self.compute()
 
-    def compute(self, cachedir: str = ".gracicache") -> Any:
+    def compute(self, cachedir: str = ".funstash") -> Any:
         with _context():
             return self.todelayed().compute(location=cachedir)
 
