@@ -17,6 +17,10 @@ def _timeonce(f: Callable[[], Any]) -> float:
     return timeit.timeit(f, number=1)
 
 
+def _add_xy(x: int, y: int):
+    return x + y
+
+
 class TestNode(unittest.TestCase):
 
     def test_constructor(self):
@@ -34,6 +38,28 @@ class TestNode(unittest.TestCase):
                             ).compute()
         self.assertEqual(result, 5)
 
+    def test_integer_keywordarguments(self):
+        result = graci.node(_add_xy, x=2, y=3).compute()
+        self.assertEqual(result, 5)
+
+    def test_node_keywordarguments(self):
+        result = graci.node(_add_xy,
+                            x=graci.node(lambda: 2),
+                            y=graci.node(lambda: 3),
+                            ).compute()
+        self.assertEqual(result, 5)
+
+    def test_integer_mixedarguments(self):
+        result = graci.node(_add_xy, 2, y=3).compute()
+        self.assertEqual(result, 5)
+
+    def test_node_mixedarguments(self):
+        result = graci.node(_add_xy,
+                            graci.node(lambda: 2),
+                            y=graci.node(lambda: 3),
+                            ).compute()
+        self.assertEqual(result, 5)
+
     def test_cache(self):
         cachedir = tempfile.mkdtemp()
         node = graci.node(_slow_identity, 5, waitseconds=1)
@@ -42,3 +68,19 @@ class TestNode(unittest.TestCase):
         t2 = _timeonce(f)
         self.assertGreater(t1, 0.5)
         self.assertLess(t2, 0.5)
+
+    def test_modify_arguments(self):
+        node = graci.node(operator.add, 2, 3)
+        result1 = node.compute()
+        node[1] = 4
+        result2 = node.compute()
+        self.assertEqual(result1, 5)
+        self.assertEqual(result2, 6)
+
+    def test_modify_keywordarguments(self):
+        node = graci.node(_add_xy, x=2, y=3)
+        result1 = node.compute()
+        node["y"] = 4
+        result2 = node.compute()
+        self.assertEqual(result1, 5)
+        self.assertEqual(result2, 6)
