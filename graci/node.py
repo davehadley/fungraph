@@ -2,7 +2,7 @@ import itertools
 from contextlib import suppress
 from copy import deepcopy
 from types import MappingProxyType
-from typing import Callable, Any, Tuple
+from typing import Callable, Any, Tuple, Dict, Optional
 
 import graphchain
 import dask
@@ -108,11 +108,13 @@ class Node:
     def clone(self):
         return deepcopy(self)
 
-    def scan(self, argument, range, name=None):
+    def scan(self, arguments: Dict[str, Any], name: Optional[str]=None):
         result = []
-        for value in range:
+        newargs = (zip(arguments.keys(), values) for values in zip(*(arguments.values())))
+        for a in newargs:
             clone = self.clone()
-            clone.set(argument, value)
+            for k, v in a:
+                clone.set(k, v)
             result.append(clone)
         if name:
             result = named(name, lambda *args: tuple(args), *result)

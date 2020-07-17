@@ -106,3 +106,15 @@ class TestNode(unittest.TestCase):
         with shelve.open("testshelf.shelf.db") as s:
             node2 = s["test_node"]
         self.assertEqual(node1.compute(), node2.compute())
+
+    def test_scan_oneargument(self):
+        node = graci.node(operator.mul, 2, 2)
+        scan = node.scan({0:[1, 2, 3, 4]})
+        self.assertEqual(node.compute(), 4)
+        self.assertEqual(scan.compute(), (2, 4, 6, 8))
+
+    def test_scan_twoarguments(self):
+        node = graci.node(operator.mul, 2, 2)
+        scan = node.scan({0:[1, 2, 3, 4], 1:[1, 2, 3, 4]})
+        self.assertEqual(node.compute(), 4)
+        self.assertEqual(scan.compute(), (1, 4, 9, 16))
