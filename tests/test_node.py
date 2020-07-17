@@ -81,6 +81,16 @@ class TestNode(unittest.TestCase):
         self.assertEqual(result1, 5)
         self.assertEqual(result2, 6)
 
+    def test_modify_nonexistant_argument_raises_keyerror(self):
+        node = graci.node(operator.add, 2, 3)
+        with self.assertRaises(KeyError):
+            node[2] = 4
+
+    def test_modify_nonexistant_kwargument_raises_keyerror(self):
+        node = graci.node(_add_xy, x=2, y=3)
+        with self.assertRaises(KeyError):
+            node["z"] = 4
+
     def test_modify_keywordarguments(self):
         node = graci.node(_add_xy, x=2, y=3)
         result1 = node.compute()

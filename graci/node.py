@@ -50,7 +50,7 @@ class Node:
         try:
             return self._setarg(item, value)
         except (KeyError, IndexError):
-            return self._setnamed(item, recursive=True)
+            return self._setnamed(item, value, recursive=True)
         raise KeyError(f"{self} has no item {item}")
 
     def _getarg(self, item: Union[str, int]):
@@ -60,14 +60,17 @@ class Node:
             try:
                 return self._kwargs[item]
             except KeyError:
-                raise KeyError(f"{self} has no item {item}")
+                raise KeyError(f"{self} has no argument {item}")
 
     def _setarg(self, key, value):
         try:
             self._args[key] = value
+            return
         except TypeError:
-            self._kwargs[key] = value
-        return
+            if key in self._kwargs:
+                self._kwargs[key] = value
+                return
+        raise KeyError(f"{self} has no argument {key}")
 
     def _iterchildnodes(self):
         return ((k, n) for k, n in itertools.chain(enumerate(self.args), self.kwargs.items())
