@@ -98,9 +98,9 @@ class Node:
     def __call__(self):
         return self.compute()
 
-    def compute(self) -> Any:
+    def compute(self, cachedir: str=".gracicache") -> Any:
         with _context():
-            return self.todelayed().compute()
+            return self.todelayed().compute(location=cachedir)
 
     def __repr__(self):
         return f"AnonNode({self.f.__name__}, args={self.args}, kwargs={self.kwargs})"
