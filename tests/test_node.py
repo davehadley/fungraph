@@ -28,6 +28,7 @@ def _add_xy(x: int, y: int):
 def _mul_xy(x: int, y: int):
     return x * y
 
+
 class TestNode(unittest.TestCase):
 
     def test_constructor(self):
@@ -55,6 +56,34 @@ class TestNode(unittest.TestCase):
                             y=graci.node(lambda: 3),
                             ).compute()
         self.assertEqual(result, 5)
+
+    def test_path_arguments(self):
+        node = graci.node(_add_xy,
+                          graci.node(_mul_xy, 1, 2),
+                          graci.node(_mul_xy, 3, 4),
+                          )
+        self.assertEqual(node[0][0], 1)
+        self.assertEqual(node[0][1], 2)
+        self.assertEqual(node[1][0], 3)
+        self.assertEqual(node[1][1], 4)
+        self.assertEqual(node["0/0"], 1)
+        self.assertEqual(node["0/1"], 2)
+        self.assertEqual(node["1/0"], 3)
+        self.assertEqual(node["1/1"], 4)
+
+    def test_path_kwarguments(self):
+        node = graci.node(_add_xy,
+                          x=graci.node(_mul_xy, x=1, y=2),
+                          y=graci.node(_mul_xy, x=3, y=4),
+                          )
+        self.assertEqual(node["x"]["x"], 1)
+        self.assertEqual(node["x"]["y"], 2)
+        self.assertEqual(node["y"]["x"], 3)
+        self.assertEqual(node["y"]["y"], 4)
+        self.assertEqual(node["x/x"], 1)
+        self.assertEqual(node["x/y"], 2)
+        self.assertEqual(node["y/x"], 3)
+        self.assertEqual(node["y/y"], 4)
 
     def test_integer_mixedarguments(self):
         result = graci.node(_add_xy, 2, y=3).compute()
@@ -104,14 +133,32 @@ class TestNode(unittest.TestCase):
 
     def test_modify_nodearguments(self):
         node = graci.node(operator.add,
-                          graci.node(lambda : 2),
-                          graci.node(lambda : 3)
+                          graci.node(lambda: 2),
+                          graci.node(lambda: 3)
                           )
         result1 = node.compute()
-        node[1] = graci.node(lambda : 4)
+        node[1] = graci.node(lambda: 4)
         result2 = node.compute()
         self.assertEqual(result1, 5)
         self.assertEqual(result2, 6)
+
+    def test_modify_path_arguments(self):
+        node = graci.node(_add_xy,
+                          graci.node(_mul_xy, 1, y=2),
+                          y=graci.node(_mul_xy, 3, y=4),
+                          )
+        node["0/0"] = 10
+        node["0/y"] = 20
+        node["y/0"] = 30
+        node["y/y"] = 40
+        self.assertEqual(node[0][0], 10)
+        self.assertEqual(node[0]["y"], 20)
+        self.assertEqual(node["y"][0], 30)
+        self.assertEqual(node["y"]["y"], 40)
+        self.assertEqual(node["0/0"], 10)
+        self.assertEqual(node["0/y"], 20)
+        self.assertEqual(node["y/0"], 30)
+        self.assertEqual(node["y/y"], 40)
 
     def test_pickleable(self):
         node1 = graci.node(_add_xy, x=2, y=3)
@@ -133,29 +180,29 @@ class TestNode(unittest.TestCase):
 
     def test_scan_oneargument(self):
         node = graci.node(operator.mul, 2, 2)
-        scan = node.scan({0:[1, 2, 3, 4]})
+        scan = node.scan({0: [1, 2, 3, 4]})
         self.assertEqual(node.compute(), 4)
         self.assertEqual(scan.compute(), (2, 4, 6, 8))
 
     def test_scan_twoarguments(self):
         node = graci.node(operator.mul, 2, 2)
-        scan = node.scan({0:[1, 2, 3, 4], 1:[1, 2, 3, 4]})
+        scan = node.scan({0: [1, 2, 3, 4], 1: [1, 2, 3, 4]})
         self.assertEqual(node.compute(), 4)
         self.assertEqual(scan.compute(), (1, 4, 9, 16))
 
     def test_scan_twoarguments_mismatched_length_raises(self):
         node = graci.node(operator.mul, 2, 2)
         with self.assertRaises(ValueError):
-            node.scan({0:[1, 2, 3, 4], 1:[1, 2, 3, 4, 5]})
+            node.scan({0: [1, 2, 3, 4], 1: [1, 2, 3, 4, 5]})
 
     def test_scan_onekwargument(self):
         node = graci.node(_mul_xy, x=2, y=2)
-        scan = node.scan({"x":[1, 2, 3, 4]})
+        scan = node.scan({"x": [1, 2, 3, 4]})
         self.assertEqual(node.compute(), 4)
         self.assertEqual(scan.compute(), (2, 4, 6, 8))
 
     def test_scan_twokwargument(self):
         node = graci.node(_mul_xy, x=2, y=2)
-        scan = node.scan({"x":[1, 2, 3, 4], "y":[1, 2, 3, 4]})
+        scan = node.scan({"x": [1, 2, 3, 4], "y": [1, 2, 3, 4]})
         self.assertEqual(node.compute(), 4)
         self.assertEqual(scan.compute(), (1, 4, 9, 16))
