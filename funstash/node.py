@@ -8,34 +8,12 @@ import graphchain
 import dask
 from dask import delayed
 
-from funstash.internal.util import ziporraise
+from funstash.internal.util import rsplitornone, splitornone, toint, ziporraise
 
 
 def _context() -> dask.config.set:
     return dask.config.set(scheduler="sync",
                            delayed_optimize=graphchain.optimize)
-
-
-def _splitornone(item: str, delimiter: str = "/") -> Tuple[Any, Optional[str]]:
-    try:
-        first, second = item.split(delimiter, maxsplit=1)
-        return (first, second)
-    except:
-        return (item, None)
-
-
-def _rsplitornone(item: str, delimiter: str = "/") -> Tuple[Any, Optional[str]]:
-    try:
-        first, second = item.rsplit(delimiter, maxsplit=1)
-        return (first, second)
-    except:
-        return (None, item)
-
-
-def _toint(value: Any) -> Any:
-    with suppress(ValueError, TypeError):
-        value = int(value)
-    return value
 
 
 class Node:
@@ -64,7 +42,7 @@ class Node:
         return self.set(key, value)
 
     def get(self, item: Union[str, int]) -> Any:
-        item, continuation = map(_toint, _splitornone(item))
+        item, continuation = map(toint, splitornone(item))
         item = self._justget(item)
         return item if continuation is None else item.get(continuation)
 
@@ -75,7 +53,7 @@ class Node:
             return self._getnamed(item, recursive=True)
 
     def set(self, item: Union[str, int], value: Any) -> None:
-        getfirst, item = map(_toint, _rsplitornone(item))
+        getfirst, item = map(toint, rsplitornone(item))
         node = self if getfirst is None else self._justget(getfirst)
         return node._justset(item, value)
         return item if continuation is None else item.get(continuation)
