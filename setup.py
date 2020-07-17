@@ -3,7 +3,7 @@ from setuptools import setup
 with open("README.md", "r") as readme:
     long_description = readme.read()
 
-with open("fungraph/_version.py") as fp:
+with open("graci/_version.py") as fp:
     version = {}
     exec(fp.read(), version)
     version = version["__version__"]
