@@ -212,6 +212,40 @@ class TestNode(unittest.TestCase):
                           x=graci.node(_mul_xy, x=1, y=2),
                           y=graci.node(_mul_xy, x=3, y=4),
                           )
-        scan = node.scan({"x/x":[1, 2, 3], "y/x": [1,2,3]})
-        self.assertEqual(node.compute(), 2+3*4)
-        self.assertEqual(scan.compute(), (1*2+1*4, 2*2+2*4, 3*2+3*4))
+        scan = node.scan({"x/x": [1, 2, 3], "y/x": [1, 2, 3]})
+        self.assertEqual(node.compute(), 2 + 3 * 4)
+        self.assertEqual(scan.compute(), (1 * 2 + 1 * 4, 2 * 2 + 2 * 4, 3 * 2 + 3 * 4))
+
+    def test_clone(self):
+        node = graci.node(operator.add,
+                          graci.node(lambda: 2),
+                          graci.node(lambda: 3),
+                          )
+        clone = node.clone()
+        self.assertEqual(node.compute(), clone.compute())
+
+    def test_modify_clone(self):
+        node = graci.node(operator.add,
+                          graci.node(lambda: 2),
+                          graci.node(lambda: 3),
+                          )
+        clone = node.clone()
+        clone[1] = graci.node(lambda: 4)
+        self.assertEqual(node.compute(), 5)
+        self.assertEqual(clone.compute(), 6)
+
+    def test_clone_reuses_cache(self):
+        cachedir = tempfile.mkdtemp()
+        node = graci.node(operator.add,
+                          graci.node(_slow_identity, 2, waitseconds=1),
+                          graci.node(_slow_identity, 3, waitseconds=1),
+                          )
+        clone = node.clone()
+        nodefunc = lambda: node.compute(cachedir=cachedir)
+        clonefunc = lambda: clone.compute(cachedir=cachedir)
+        tn1 = _timeonce(nodefunc)
+        tn2 = _timeonce(nodefunc)
+        tc1 = _timeonce(clonefunc)
+        self.assertGreater(tn1, 0.5)
+        self.assertLess(tn2, 0.5)
+        self.assertLess(tc1, 0.5)
