@@ -1,9 +1,13 @@
 import operator
+import pickle
+import shelve
 import tempfile
 import timeit
 import unittest
 from time import sleep
 from typing import Any, Callable
+
+import cloudpickle
 
 import graci
 
@@ -84,3 +88,21 @@ class TestNode(unittest.TestCase):
         result2 = node.compute()
         self.assertEqual(result1, 5)
         self.assertEqual(result2, 6)
+
+    def test_pickleable(self):
+        node1 = graci.node(_add_xy, x=2, y=3)
+        node2 = pickle.loads(pickle.dumps(node1))
+        self.assertEqual(node1.compute(), node2.compute())
+
+    def test_cloudpickle(self):
+        node1 = graci.node(_add_xy, x=graci.node(lambda: 2), y=3)
+        node2 = cloudpickle.loads(cloudpickle.dumps(node1))
+        self.assertEqual(node1.compute(), node2.compute())
+
+    def test_shelveable(self):
+        node1 = graci.node(_add_xy, x=2, y=3)
+        with shelve.open("testshelf.shelf.db") as s:
+            s["test_node"] = node1
+        with shelve.open("testshelf.shelf.db") as s:
+            node2 = s["test_node"]
+        self.assertEqual(node1.compute(), node2.compute())
