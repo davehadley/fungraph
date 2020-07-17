@@ -25,6 +25,9 @@ def _add_xy(x: int, y: int):
     return x + y
 
 
+def _mul_xy(x: int, y: int):
+    return x * y
+
 class TestNode(unittest.TestCase):
 
     def test_constructor(self):
@@ -134,3 +137,14 @@ class TestNode(unittest.TestCase):
         with self.assertRaises(ValueError):
             node.scan({0:[1, 2, 3, 4], 1:[1, 2, 3, 4, 5]})
 
+    def test_scan_onekwargument(self):
+        node = graci.node(_mul_xy, x=2, y=2)
+        scan = node.scan({"x":[1, 2, 3, 4]})
+        self.assertEqual(node.compute(), 4)
+        self.assertEqual(scan.compute(), (2, 4, 6, 8))
+
+    def test_scan_twokwargument(self):
+        node = graci.node(_mul_xy, x=2, y=2)
+        scan = node.scan({"x":[1, 2, 3, 4], "y":[1, 2, 3, 4]})
+        self.assertEqual(node.compute(), 4)
+        self.assertEqual(scan.compute(), (1, 4, 9, 16))
