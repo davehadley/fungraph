@@ -102,6 +102,17 @@ class TestNode(unittest.TestCase):
         self.assertEqual(result1, 5)
         self.assertEqual(result2, 6)
 
+    def test_modify_nodearguments(self):
+        node = graci.node(operator.add,
+                          graci.node(lambda : 2),
+                          graci.node(lambda : 3)
+                          )
+        result1 = node.compute()
+        node[1] = graci.node(lambda : 4)
+        result2 = node.compute()
+        self.assertEqual(result1, 5)
+        self.assertEqual(result2, 6)
+
     def test_pickleable(self):
         node1 = graci.node(_add_xy, x=2, y=3)
         node2 = pickle.loads(pickle.dumps(node1))
