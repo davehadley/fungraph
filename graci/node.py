@@ -2,11 +2,13 @@ import itertools
 from contextlib import suppress
 from copy import deepcopy
 from types import MappingProxyType
-from typing import Callable, Any, Tuple, Dict, Optional, Union
+from typing import Callable, Any, Tuple, Dict, Optional, Union, Iterator, Mapping
 
 import graphchain
 import dask
 from dask import delayed
+
+from graci.internal.util import ziporraise
 
 
 def _context() -> dask.config.set:
@@ -33,10 +35,10 @@ class Node:
     def f(self) -> Callable[..., Any]:
         return self._f
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: Union[str, int]):
         return self.get(item)
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: Union[str, int], value: Any):
         return self.set(key, value)
 
     def get(self, item: Union[str, int]) -> Any:
@@ -44,14 +46,12 @@ class Node:
             return self._getarg(item)
         except (KeyError, IndexError):
             return self._getnamed(item, recursive=True)
-        raise KeyError(f"{self} has no item {item}")
 
     def set(self, item: Union[str, int], value: Any) -> None:
         try:
             return self._setarg(item, value)
         except (KeyError, IndexError):
             return self._setnamed(item, value, recursive=True)
-        raise KeyError(f"{self} has no item {item}")
 
     def _getarg(self, item: Union[str, int]):
         try:
@@ -62,7 +62,7 @@ class Node:
             except KeyError:
                 raise KeyError(f"{self} has no argument {item}")
 
-    def _setarg(self, key, value):
+    def _setarg(self, key: Union[str, int], value: Any):
         try:
             self._args[key] = value
             return
@@ -72,12 +72,12 @@ class Node:
                 return
         raise KeyError(f"{self} has no argument {key}")
 
-    def _iterchildnodes(self):
+    def _iterchildnodes(self) -> Iterator[Tuple[Union[str, int], "Node"]]:
         return ((k, n) for k, n in itertools.chain(enumerate(self.args), self.kwargs.items())
                 if isinstance(n, Node)
                 )
 
-    def _getnamed(self, name: str, recursive: bool = True):
+    def _getnamed(self, name: str, recursive: bool = True) -> "Node":
         for _, a in self._iterchildnodes():
             with suppress(Exception):
                 if name == a.name:
@@ -85,7 +85,7 @@ class Node:
         if recursive:
             for _, a in self._iterchildnodes():
                 with suppress(Exception):
-                    return a.get(name, recursive=recursive)
+                    return a._getnamed(name, recursive=recursive)
         raise KeyError(f"{self} does not contain \"{name}\"")
 
     def _setnamed(self, name: str, value: Any, recursive: bool = True):
@@ -98,7 +98,7 @@ class Node:
         if recursive:
             for index, a in self._iterchildnodes():
                 with suppress(Exception):
-                    a.set(name, value, recursive=recursive)
+                    a._setnamed(name, value, recursive=recursive)
                     found = True
         if not found:
             raise KeyError(f"{self} does not contain \"{name}\"")
@@ -131,9 +131,9 @@ class Node:
     def clone(self):
         return deepcopy(self)
 
-    def scan(self, arguments: Dict[str, Any], name: Optional[str] = None):
+    def scan(self, arguments: Mapping[str, Any], name: Optional[str] = None):
         result = []
-        newargs = (zip(arguments.keys(), values) for values in zip(*(arguments.values())))
+        newargs = (ziporraise(arguments.keys(), values) for values in ziporraise(*(arguments.values())))
         for a in newargs:
             clone = self.clone()
             for k, v in a:
@@ -161,3 +161,6 @@ def named(name: str, f: Callable[..., Any], *args: Any, **kwargs: Any) -> NamedN
 
 def node(f: Callable[..., Any], *args: Any, **kwargs: Any) -> Node:
     return Node(f, *args, **kwargs)
+
+
+

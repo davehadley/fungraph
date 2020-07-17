@@ -128,3 +128,9 @@ class TestNode(unittest.TestCase):
         scan = node.scan({0:[1, 2, 3, 4], 1:[1, 2, 3, 4]})
         self.assertEqual(node.compute(), 4)
         self.assertEqual(scan.compute(), (1, 4, 9, 16))
+
+    def test_scan_twoarguments_mismatched_length_raises(self):
+        node = graci.node(operator.mul, 2, 2)
+        with self.assertRaises(ValueError):
+            node.scan({0:[1, 2, 3, 4], 1:[1, 2, 3, 4, 5]})
+
