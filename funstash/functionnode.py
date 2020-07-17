@@ -137,7 +137,7 @@ class FunctionNode:
             return self.todelayed().compute(location=cachedir)
 
     def __repr__(self):
-        return f"AnonNode({self.f.__name__}, args={self.args}, kwargs={self.kwargs})"
+        return f"FunctionNode({self.f.__name__}, args={self.args}, kwargs={self.kwargs})"
 
     def clone(self):
         return deepcopy(self)
@@ -163,7 +163,7 @@ class NamedFunctionNode(FunctionNode):
         self.name = name
 
     def __repr__(self):
-        return f"Node({self.name}, {self.f.__name__}, args={self.args}, kwargs={self.kwargs})"
+        return f"NamedFunctionNode({self.name}, {self.f.__name__}, args={self.args}, kwargs={self.kwargs})"
 
 
 def named(name: str, f: Callable[..., Any], *args: Any, **kwargs: Any) -> NamedFunctionNode:
