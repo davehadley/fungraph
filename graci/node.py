@@ -2,7 +2,7 @@ import itertools
 from contextlib import suppress
 from copy import deepcopy
 from types import MappingProxyType
-from typing import Callable, Any, Tuple, Dict, Optional
+from typing import Callable, Any, Tuple, Dict, Optional, Union
 
 import graphchain
 import dask
@@ -34,6 +34,26 @@ class Node:
         return self._f
 
     def __getitem__(self, item):
+        return self.get(item)
+
+    def __setitem__(self, key, value):
+        return self.set(key, value)
+
+    def get(self, item: Union[str, int]) -> Any:
+        try:
+            return self._getarg(item)
+        except (KeyError, IndexError):
+            return self._getnamed(item, recursive=True)
+        raise KeyError(f"{self} has no item {item}")
+
+    def set(self, item: Union[str, int], value: Any) -> None:
+        try:
+            return self._setarg(item, value)
+        except (KeyError, IndexError):
+            return self._setnamed(item, recursive=True)
+        raise KeyError(f"{self} has no item {item}")
+
+    def _getarg(self, item: Union[str, int]):
         try:
             return self._args[item]
         except TypeError:
@@ -42,7 +62,7 @@ class Node:
             except KeyError:
                 raise KeyError(f"{self} has no item {item}")
 
-    def __setitem__(self, key, value):
+    def _setarg(self, key, value):
         try:
             self._args[key] = value
         except TypeError:
@@ -54,7 +74,7 @@ class Node:
                 if isinstance(n, Node)
                 )
 
-    def get(self, name: str, recursive: bool = True):
+    def _getnamed(self, name: str, recursive: bool = True):
         for _, a in self._iterchildnodes():
             with suppress(Exception):
                 if name == a.name:
@@ -63,9 +83,9 @@ class Node:
             for _, a in self._iterchildnodes():
                 with suppress(Exception):
                     return a.get(name, recursive=recursive)
-        raise AttributeError(f"{self} does not contain \"{name}\"")
+        raise KeyError(f"{self} does not contain \"{name}\"")
 
-    def set(self, name: str, value: Any, recursive: bool = True):
+    def _setnamed(self, name: str, value: Any, recursive: bool = True):
         found = False
         for index, a in self._iterchildnodes():
             with suppress(Exception):
@@ -78,7 +98,7 @@ class Node:
                     a.set(name, value, recursive=recursive)
                     found = True
         if not found:
-            raise AttributeError(f"{self} does not contain \"{name}\"")
+            raise KeyError(f"{self} does not contain \"{name}\"")
 
     def todelayed(self) -> delayed:
         args = []
@@ -98,7 +118,7 @@ class Node:
     def __call__(self):
         return self.compute()
 
-    def compute(self, cachedir: str=".gracicache") -> Any:
+    def compute(self, cachedir: str = ".gracicache") -> Any:
         with _context():
             return self.todelayed().compute(location=cachedir)
 
@@ -108,7 +128,7 @@ class Node:
     def clone(self):
         return deepcopy(self)
 
-    def scan(self, arguments: Dict[str, Any], name: Optional[str]=None):
+    def scan(self, arguments: Dict[str, Any], name: Optional[str] = None):
         result = []
         newargs = (zip(arguments.keys(), values) for values in zip(*(arguments.values())))
         for a in newargs:
@@ -134,6 +154,7 @@ class NamedNode(Node):
 
 def named(name: str, f: Callable[..., Any], *args: Any, **kwargs: Any) -> NamedNode:
     return NamedNode(name, f, *args, **kwargs)
+
 
 def node(f: Callable[..., Any], *args: Any, **kwargs: Any) -> Node:
     return Node(f, *args, **kwargs)
