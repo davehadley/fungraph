@@ -206,3 +206,12 @@ class TestNode(unittest.TestCase):
         scan = node.scan({"x": [1, 2, 3, 4], "y": [1, 2, 3, 4]})
         self.assertEqual(node.compute(), 4)
         self.assertEqual(scan.compute(), (1, 4, 9, 16))
+
+    def test_scan_pathargument(self):
+        node = graci.node(_add_xy,
+                          x=graci.node(_mul_xy, x=1, y=2),
+                          y=graci.node(_mul_xy, x=3, y=4),
+                          )
+        scan = node.scan({"x/x":[1, 2, 3], "y/x": [1,2,3]})
+        self.assertEqual(node.compute(), 2+3*4)
+        self.assertEqual(scan.compute(), (1*2+1*4, 2*2+2*4, 3*2+3*4))
