@@ -16,7 +16,7 @@ def _context() -> dask.config.set:
                            delayed_optimize=graphchain.optimize)
 
 
-class Node:
+class FunctionNode:
 
     def __init__(self, f: Callable[..., Any], *args: Any, **kwargs: Any):
         self._f = f
@@ -83,12 +83,12 @@ class Node:
                 return
         raise KeyError(f"{self} has no argument {key}")
 
-    def _iterchildnodes(self) -> Iterator[Tuple[Union[str, int], "Node"]]:
+    def _iterchildnodes(self) -> Iterator[Tuple[Union[str, int], "FunctionNode"]]:
         return ((k, n) for k, n in itertools.chain(enumerate(self.args), self.kwargs.items())
-                if isinstance(n, Node)
+                if isinstance(n, FunctionNode)
                 )
 
-    def _getnamed(self, name: str, recursive: bool = True) -> "Node":
+    def _getnamed(self, name: str, recursive: bool = True) -> "FunctionNode":
         for _, a in self._iterchildnodes():
             with suppress(Exception):
                 if name == a.name:
@@ -153,11 +153,11 @@ class Node:
         if name:
             result = named(name, lambda *args: tuple(args), *result)
         else:
-            result = node(lambda *args: tuple(args), *result)
+            result = fun(lambda *args: tuple(args), *result)
         return result
 
 
-class NamedNode(Node):
+class NamedFunctionNode(FunctionNode):
     def __init__(self, name: str, f: Callable[..., Any], *args: Any, **kwargs: Any):
         super().__init__(f, *args, **kwargs)
         self.name = name
@@ -166,9 +166,9 @@ class NamedNode(Node):
         return f"Node({self.name}, {self.f.__name__}, args={self.args}, kwargs={self.kwargs})"
 
 
-def named(name: str, f: Callable[..., Any], *args: Any, **kwargs: Any) -> NamedNode:
-    return NamedNode(name, f, *args, **kwargs)
+def named(name: str, f: Callable[..., Any], *args: Any, **kwargs: Any) -> NamedFunctionNode:
+    return NamedFunctionNode(name, f, *args, **kwargs)
 
 
-def node(f: Callable[..., Any], *args: Any, **kwargs: Any) -> Node:
-    return Node(f, *args, **kwargs)
+def fun(f: Callable[..., Any], *args: Any, **kwargs: Any) -> FunctionNode:
+    return FunctionNode(f, *args, **kwargs)

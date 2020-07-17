@@ -10,6 +10,6 @@ __license__ = "MIT"
 __author__ = "David Hadley"
 url = "https://github.com/davehadley/funstash"
 
-from funstash.node import node, named
+from funstash.functionnode import fun, named
 
-__all__ = ["node", "named"]
+__all__ = ["fun", "named"]
