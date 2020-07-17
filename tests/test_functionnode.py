@@ -29,7 +29,7 @@ def _mul_xy(x: int, y: int):
     return x * y
 
 
-class TestNode(unittest.TestCase):
+class TestFunctionNode(unittest.TestCase):
 
     def test_constructor(self):
         f = funstash.fun(lambda: None)
