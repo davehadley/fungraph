@@ -1,6 +1,7 @@
-"""graci
+"""fungraph
 
-Graph of lazily evaluated functions with Automatically Cached Intermediates.
+Lazily evaluated mutable graph of functions with automatically cached intermediate values.
+
 """
 
 from fungraph import _version

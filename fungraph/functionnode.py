@@ -8,8 +8,8 @@ import graphchain
 import dask
 from dask import delayed
 
-from fungraph import nodefactory
-from fungraph.internal.util import rsplitornone, splitornone, toint, ziporraise
+from fungraph.internal import scan
+from fungraph.internal.util import rsplitornone, splitornone, toint
 
 
 def _context() -> dask.config.set:
@@ -144,15 +144,4 @@ class FunctionNode:
         return deepcopy(self)
 
     def scan(self, arguments: Mapping[str, Any], name: Optional[str] = None):
-        result = []
-        newargs = (ziporraise(arguments.keys(), values) for values in ziporraise(*(arguments.values())))
-        for a in newargs:
-            clone = self.clone()
-            for k, v in a:
-                clone.set(k, v)
-            result.append(clone)
-        if name:
-            result = nodefactory.named(name, lambda *args: tuple(args), *result)
-        else:
-            result = nodefactory.fun(lambda *args: tuple(args), *result)
-        return result
+        return scan.scan(self, arguments, name)
