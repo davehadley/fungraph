@@ -186,3 +186,17 @@ class TestNamedFunctionNode(unittest.TestCase):
                               )
         bs = node.getall("b")
         self.assertEqual([b.compute() for b in bs], [2, 4])
+
+    def test_set_all(self):
+        node = fungraph.named("add", operator.add,
+                              fungraph.named("p1", operator.mul,
+                                             fungraph.named("a", lambda: 1),
+                                             fungraph.named("b", lambda: 2),
+                                             ),
+                              fungraph.named("p2", operator.mul,
+                                             fungraph.named("a", lambda: 3),
+                                             fungraph.named("b", lambda: 4),
+                                             )
+                              )
+        node.setall("b", fungraph.named("c", lambda: 5))
+        self.assertEqual(node.compute(), 1*5+3*5)

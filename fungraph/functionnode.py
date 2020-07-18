@@ -83,13 +83,22 @@ class FunctionNode:
     def set(self, key: Union[str, int, Name, KeywordArgument], value: Any) -> None:
         getfirst, key = self._parsekey(key, reverse=True)
         node = self if getfirst is None else self._justgetone(getfirst)
-        return node._justset(key, value)
+        return node._justsetone(key, value)
 
-    def _justset(self, key: Union[str, int, Name, KeywordArgument], value: Any) -> None:
+    def setall(self, key: Union[str, int, Name, KeywordArgument], value: Any):
+        getfirst, key = self._parsekey(key, reverse=True)
+        node = (self,) if getfirst is None else self._justget(getfirst)
+        for n in node:
+            n._justset(key, value)
+
+    def _justsetone(self, key: Union[str, int, Name, KeywordArgument], value: Any) -> None:
+        return self._justset(key, value, recursive=False)
+
+    def _justset(self, key: Union[str, int, Name, KeywordArgument], value: Any, recursive: bool=True) -> None:
         try:
             return self._setarg(key if not isinstance(key, KeywordArgument) else key.value, value)
         except (KeyError, IndexError):
-            return self._setnamed(key if not isinstance(key, Name) else key.value, value, recursive=False)
+            return self._setnamed(key if not isinstance(key, Name) else key.value, value, recursive=recursive)
 
     def _getarg(self, key: Union[str, int]) -> Iterator[Any]:
         try:
