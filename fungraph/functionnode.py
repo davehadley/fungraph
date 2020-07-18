@@ -8,7 +8,7 @@ import graphchain
 import dask
 from dask import delayed
 
-from fungraph import factory
+from fungraph import nodefactory
 from fungraph.internal.util import rsplitornone, splitornone, toint, ziporraise
 
 
@@ -152,7 +152,7 @@ class FunctionNode:
                 clone.set(k, v)
             result.append(clone)
         if name:
-            result = factory.named(name, lambda *args: tuple(args), *result)
+            result = nodefactory.named(name, lambda *args: tuple(args), *result)
         else:
-            result = factory.fun(lambda *args: tuple(args), *result)
+            result = nodefactory.fun(lambda *args: tuple(args), *result)
         return result
