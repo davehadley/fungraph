@@ -12,6 +12,7 @@ from fungraph.internal import scan
 from fungraph.internal.util import rsplitornone, splitornone, toint, call_if_arg_not_none
 from fungraph.keywordargument import KeywordArgument
 from fungraph.name import Name
+from fungraph.error import InvalidFunctionError
 
 
 def _context() -> dask.config.set:
@@ -22,6 +23,8 @@ def _context() -> dask.config.set:
 class FunctionNode:
 
     def __init__(self, f: Callable[..., Any], *args: Any, **kwargs: Any):
+        if not callable(f):
+            raise InvalidFunctionError("function node given a non-callable object", f)
         self._f = f
         self._args = list(args)
         self._kwargs = dict(kwargs)
