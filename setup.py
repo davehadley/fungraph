@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open("README.md", "r") as readme:
     long_description = readme.read()
@@ -17,7 +17,7 @@ setup(name="fungraph",
       author="David Hadley",
       author_email="d.r.hadley@warwick.ac.uk",
       license="MIT",
-      packages=["fungraph"],
+      packages=find_packages(),
       install_requires=["dask>=2.20.0", "graphchain>=1.1.0"],
       zip_safe=True,
       classifiers=[
