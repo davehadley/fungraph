@@ -46,8 +46,13 @@ class FunctionNode:
 
     def get(self, key: Union[str, int, Name, KeywordArgument]) -> Any:
         key, continuation = self._parsekey(key, reverse=False)
-        item = self._justget(key)
+        item = self._justgetone(key)
         return item if continuation is None else item.get(continuation)
+
+    def getall(self, key: Union[str, int, Name, KeywordArgument], recursive:bool=True) -> Iterator[Any]:
+        key, continuation = self._parsekey(key, reverse=False)
+        for match in self._justget(key, recursive=recursive):
+            yield match if continuation is None else match.get(continuation)
 
     def _parsekey(self, key, reverse=False):
         if isinstance(key, Name):
@@ -63,15 +68,21 @@ class FunctionNode:
         lhs, rhs = map(toint, split(key))
         return wrapper(lhs), wrapper(rhs)
 
-    def _justget(self, key: Union[str, int, Name, KeywordArgument]) -> Any:
+    def _justgetone(self, key: Union[str, int, Name, KeywordArgument], recursive:bool=False) -> Any:
         try:
-            return self._getarg(key if not isinstance(key, KeywordArgument) else key.value)
+            return next(self._justget(key, recursive=recursive))
+        except StopIteration:
+            raise KeyError(f"no item {key} in {self}")
+
+    def _justget(self, key: Union[str, int, Name, KeywordArgument], recursive: bool=False) -> Iterator[Any]:
+        try:
+            yield from self._getarg(key if not isinstance(key, KeywordArgument) else key.value)
         except (KeyError, IndexError):
-            return self._getnamed(key if not isinstance(key, Name) else key.value, recursive=False)
+            yield from self._getnamed(key if not isinstance(key, Name) else key.value, recursive=recursive)
 
     def set(self, key: Union[str, int, Name, KeywordArgument], value: Any) -> None:
         getfirst, key = self._parsekey(key, reverse=True)
-        node = self if getfirst is None else self._justget(getfirst)
+        node = self if getfirst is None else self._justgetone(getfirst)
         return node._justset(key, value)
 
     def _justset(self, key: Union[str, int, Name, KeywordArgument], value: Any) -> None:
@@ -80,12 +91,12 @@ class FunctionNode:
         except (KeyError, IndexError):
             return self._setnamed(key if not isinstance(key, Name) else key.value, value, recursive=False)
 
-    def _getarg(self, key: Union[str, int]):
+    def _getarg(self, key: Union[str, int]) -> Iterator[Any]:
         try:
-            return self._args[key]
+            yield self._args[key]
         except TypeError:
             try:
-                return self._kwargs[key]
+                yield self._kwargs[key]
             except KeyError:
                 raise KeyError(f"{self} has no argument {key}")
 
@@ -104,16 +115,15 @@ class FunctionNode:
                 if isinstance(n, FunctionNode)
                 )
 
-    def _getnamed(self, name: str, recursive: bool = True) -> "FunctionNode":
+    def _getnamed(self, name: str, recursive: bool = True) -> "Iterator[FunctionNode]":
         for _, a in self._iterchildnodes():
             with suppress(Exception):
                 if name == a.name:
-                    return a
+                    yield a
         if recursive:
             for _, a in self._iterchildnodes():
                 with suppress(Exception):
-                    return a._getnamed(name, recursive=recursive)
-        raise KeyError(f"{self} does not contain \"{name}\"")
+                    yield from a._getnamed(name, recursive=recursive)
 
     def _setnamed(self, name: str, value: Any, recursive: bool = True):
         found = False
