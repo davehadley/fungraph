@@ -49,9 +49,10 @@ class FunctionNode:
         item = self._justgetone(key)
         return item if continuation is None else item.get(continuation)
 
-    def getall(self, key: Union[str, int, Name, KeywordArgument], recursive:bool=True) -> Iterator[Any]:
+    def getall(self, key: Union[str, Name]) -> Iterator[Any]:
+        key = key if isinstance(key, Name) else Name(key)
         key, continuation = self._parsekey(key, reverse=False)
-        for match in self._justget(key, recursive=recursive):
+        for match in self._justget(key, recursive=True):
             yield match if continuation is None else match.get(continuation)
 
     def _parsekey(self, key, reverse=False):
@@ -85,7 +86,8 @@ class FunctionNode:
         node = self if getfirst is None else self._justgetone(getfirst)
         return node._justsetone(key, value)
 
-    def setall(self, key: Union[str, int, Name, KeywordArgument], value: Any):
+    def setall(self, key: Union[str, Name], value: Any):
+        key = key if isinstance(key, Name) else Name(key)
         getfirst, key = self._parsekey(key, reverse=True)
         node = (self,) if getfirst is None else self._justget(getfirst)
         for n in node:
