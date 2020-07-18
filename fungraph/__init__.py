@@ -12,5 +12,7 @@ __author__ = "David Hadley"
 url = "https://github.com/davehadley/fungraph"
 
 from fungraph.nodefactory import fun, named, just
+from fungraph.name import Name
+from fungraph.keywordargument import KeywordArgument
 
-__all__ = ["fun", "named", "just"]
+__all__ = ["fun", "named", "just", "Name", "KeywordArgument"]

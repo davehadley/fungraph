@@ -1,6 +1,6 @@
 import itertools
 from contextlib import suppress
-from typing import Iterable, Tuple, Any, Optional
+from typing import Iterable, Tuple, Any, Optional, Callable
 
 
 def ziporraise(*iterables: Iterable):
@@ -31,3 +31,9 @@ def toint(value: Any) -> Any:
     with suppress(ValueError, TypeError):
         value = int(value)
     return value
+
+
+def call_if_arg_not_none(f: Callable[[Any], Any]) -> Any:
+    def wrapper(x):
+        return None if x is None else f(x)
+    return wrapper
