@@ -29,6 +29,19 @@ class TestNamedFunctionNode(unittest.TestCase):
         self.assertEqual(b.name, "b")
         return
 
+    def test_set_by_name(self):
+        node = fungraph.named("add", operator.add,
+                              fungraph.named("a", lambda: 1),
+                              fungraph.named("b", lambda: 2),
+                              )
+        aprime = fungraph.named("aprime", lambda: 3)
+        node["a"] = aprime
+        self.assertEqual(node.compute(), 5)
+        with self.assertRaises(KeyError):
+            node["a"]
+        return
+
+
     def test_retrieve_by_wrong_name_raises_keyerror(self):
         node = fungraph.named("add", operator.add,
                               fungraph.named("a", lambda: 1),
@@ -80,7 +93,6 @@ class TestNamedFunctionNode(unittest.TestCase):
                             )
         x = node[fungraph.Name("x")]
         y = node[fungraph.KeywordArgument("x")]
-        # prefer arguments over named
         self.assertEqual(x.compute(), 2)
         self.assertEqual(x.name, "x")
         self.assertEqual(y.compute(), 1)

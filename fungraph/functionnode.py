@@ -76,9 +76,9 @@ class FunctionNode:
 
     def _justset(self, key: Union[str, int, Name, KeywordArgument], value: Any) -> None:
         try:
-            return self._setarg(key, value)
+            return self._setarg(key if not isinstance(key, KeywordArgument) else key.value, value)
         except (KeyError, IndexError):
-            return self._setnamed(key, value, recursive=False)
+            return self._setnamed(key if not isinstance(key, Name) else key.value, value, recursive=False)
 
     def _getarg(self, key: Union[str, int]):
         try:
