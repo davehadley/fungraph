@@ -7,6 +7,7 @@ from typing import Callable, Any, Tuple, Optional, Union, Iterator, Mapping
 import graphchain
 import dask
 from dask import delayed
+from dask.delayed import Delayed
 
 from fungraph.internal import scan
 from fungraph.internal.util import rsplitornone, splitornone, toint, call_if_arg_not_none
@@ -159,13 +160,13 @@ class FunctionNode:
     def todelayed(self) -> delayed:
         args = []
         for a in self.args:
-            with suppress(AttributeError):
+            if isinstance(a, FunctionNode):
                 a = a.todelayed()
             args.append(a)
         args = tuple(args)
         kwargs = {}
         for key, a in self.kwargs.items():
-            with suppress(AttributeError):
+            if isinstance(a, FunctionNode):
                 a = a.todelayed()
             kwargs[key] = a
         result = delayed(self.f)(*args, **kwargs)
