@@ -1,4 +1,4 @@
-# funstash
+# fungraph
 
 Lazily evaluated mutable graph of functions with automatically cached intermediate values. 
 

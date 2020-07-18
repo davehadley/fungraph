@@ -8,7 +8,7 @@ import graphchain
 import dask
 from dask import delayed
 
-from funstash.internal.util import rsplitornone, splitornone, toint, ziporraise
+from fungraph.internal.util import rsplitornone, splitornone, toint, ziporraise
 
 
 def _context() -> dask.config.set:
@@ -132,7 +132,7 @@ class FunctionNode:
     def __call__(self):
         return self.compute()
 
-    def compute(self, cachedir: str = ".funstash") -> Any:
+    def compute(self, cachedir: str = ".fungraphcache") -> Any:
         with _context():
             return self.todelayed().compute(location=cachedir)
 
