@@ -51,7 +51,7 @@ class FunctionNode:
         try:
             return self._getarg(item)
         except (KeyError, IndexError):
-            return self._getnamed(item, recursive=True)
+            return self._getnamed(item, recursive=False)
 
     def set(self, item: Union[str, int], value: Any) -> None:
         getfirst, item = map(toint, rsplitornone(item))
@@ -63,7 +63,7 @@ class FunctionNode:
         try:
             return self._setarg(item, value)
         except (KeyError, IndexError):
-            return self._setnamed(item, value, recursive=True)
+            return self._setnamed(item, value, recursive=False)
 
     def _getarg(self, item: Union[str, int]):
         try:
