@@ -73,6 +73,20 @@ class TestNamedFunctionNode(unittest.TestCase):
         self.assertEqual(x.name, "y")
         return
 
+    def test_nameclash_with_kwargument_explicit(self):
+        node = fungraph.fun(_add_xy,
+                            x=fungraph.named("y", lambda: 1),
+                            y=fungraph.named("x", lambda: 2),
+                            )
+        x = node[fungraph.Name("x")]
+        y = node[fungraph.KeywordArgument("x")]
+        # prefer arguments over named
+        self.assertEqual(x.compute(), 2)
+        self.assertEqual(x.name, "x")
+        self.assertEqual(y.compute(), 1)
+        self.assertEqual(y.name, "y")
+        return
+
     def test_retrieve_by_path(self):
         node = fungraph.named("add", operator.add,
                               fungraph.named("mul1", operator.mul, fungraph.named("one", lambda: 1), fungraph.named("two", lambda: 2)),

@@ -9,7 +9,9 @@ import dask
 from dask import delayed
 
 from fungraph.internal import scan
-from fungraph.internal.util import rsplitornone, splitornone, toint
+from fungraph.internal.util import rsplitornone, splitornone, toint, call_if_arg_not_none
+from fungraph.keywordargument import KeywordArgument
+from fungraph.name import Name
 
 
 def _context() -> dask.config.set:
@@ -36,43 +38,56 @@ class FunctionNode:
     def f(self) -> Callable[..., Any]:
         return self._f
 
-    def __getitem__(self, item: Union[str, int]):
-        return self.get(item)
+    def __getitem__(self, key: Union[str, int, Name, KeywordArgument]):
+        return self.get(key)
 
-    def __setitem__(self, key: Union[str, int], value: Any):
+    def __setitem__(self, key: Union[str, int, Name, KeywordArgument], value: Any):
         return self.set(key, value)
 
-    def get(self, item: Union[str, int]) -> Any:
-        item, continuation = map(toint, splitornone(item))
-        item = self._justget(item)
+    def get(self, key: Union[str, int, Name, KeywordArgument]) -> Any:
+        key, continuation = self._parsekey(key, reverse=False)
+        item = self._justget(key)
         return item if continuation is None else item.get(continuation)
 
-    def _justget(self, item: Union[str, int]) -> Any:
-        try:
-            return self._getarg(item)
-        except (KeyError, IndexError):
-            return self._getnamed(item, recursive=False)
+    def _parsekey(self, key, reverse=False):
+        if isinstance(key, Name):
+            wrapper = call_if_arg_not_none(Name)
+            key = key.value
+        elif isinstance(key, KeywordArgument):
+            wrapper = call_if_arg_not_none(KeywordArgument)
+            key = key.value
+        else:
+            def wrapper(o):
+                return o
+        split = rsplitornone if reverse else splitornone
+        lhs, rhs = map(toint, split(key))
+        return wrapper(lhs), wrapper(rhs)
 
-    def set(self, item: Union[str, int], value: Any) -> None:
-        getfirst, item = map(toint, rsplitornone(item))
+    def _justget(self, key: Union[str, int, Name, KeywordArgument]) -> Any:
+        try:
+            return self._getarg(key if not isinstance(key, KeywordArgument) else key.value)
+        except (KeyError, IndexError):
+            return self._getnamed(key if not isinstance(key, Name) else key.value, recursive=False)
+
+    def set(self, key: Union[str, int, Name, KeywordArgument], value: Any) -> None:
+        getfirst, key = self._parsekey(key, reverse=True)
         node = self if getfirst is None else self._justget(getfirst)
-        return node._justset(item, value)
-        return item if continuation is None else item.get(continuation)
+        return node._justset(key, value)
 
-    def _justset(self, item: Union[str, int], value: Any) -> None:
+    def _justset(self, key: Union[str, int, Name, KeywordArgument], value: Any) -> None:
         try:
-            return self._setarg(item, value)
+            return self._setarg(key, value)
         except (KeyError, IndexError):
-            return self._setnamed(item, value, recursive=False)
+            return self._setnamed(key, value, recursive=False)
 
-    def _getarg(self, item: Union[str, int]):
+    def _getarg(self, key: Union[str, int]):
         try:
-            return self._args[item]
+            return self._args[key]
         except TypeError:
             try:
-                return self._kwargs[item]
+                return self._kwargs[key]
             except KeyError:
-                raise KeyError(f"{self} has no argument {item}")
+                raise KeyError(f"{self} has no argument {key}")
 
     def _setarg(self, key: Union[str, int], value: Any):
         try:
