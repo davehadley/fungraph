@@ -1,6 +1,7 @@
-"""graci
+"""fungraph
 
-Graph of lazily evaluated functions with Automatically Cached Intermediates.
+Lazily evaluated mutable graph of functions with automatically cached intermediate values.
+
 """
 
 from fungraph import _version
@@ -10,6 +11,9 @@ __license__ = "MIT"
 __author__ = "David Hadley"
 url = "https://github.com/davehadley/fungraph"
 
-from fungraph.functionnode import fun, named
+from fungraph.nodefactory import fun, named, just
+from fungraph.name import Name
+from fungraph.keywordargument import KeywordArgument
+from fungraph import error
 
-__all__ = ["fun", "named"]
+__all__ = ["fun", "named", "just", "Name", "KeywordArgument", "error"]

@@ -2,13 +2,17 @@ import itertools
 from contextlib import suppress
 from copy import deepcopy
 from types import MappingProxyType
-from typing import Callable, Any, Tuple, Dict, Optional, Union, Iterator, Mapping
+from typing import Callable, Any, Tuple, Optional, Union, Iterator, Mapping
 
 import graphchain
 import dask
 from dask import delayed
 
-from fungraph.internal.util import rsplitornone, splitornone, toint, ziporraise
+from fungraph.internal import scan
+from fungraph.internal.util import rsplitornone, splitornone, toint, call_if_arg_not_none
+from fungraph.keywordargument import KeywordArgument
+from fungraph.name import Name
+from fungraph.error import InvalidFunctionError
 
 
 def _context() -> dask.config.set:
@@ -19,6 +23,8 @@ def _context() -> dask.config.set:
 class FunctionNode:
 
     def __init__(self, f: Callable[..., Any], *args: Any, **kwargs: Any):
+        if not callable(f):
+            raise InvalidFunctionError("function node given a non-callable object", f)
         self._f = f
         self._args = list(args)
         self._kwargs = dict(kwargs)
@@ -35,43 +41,78 @@ class FunctionNode:
     def f(self) -> Callable[..., Any]:
         return self._f
 
-    def __getitem__(self, item: Union[str, int]):
-        return self.get(item)
+    def __getitem__(self, key: Union[str, int, Name, KeywordArgument]):
+        return self.get(key)
 
-    def __setitem__(self, key: Union[str, int], value: Any):
+    def __setitem__(self, key: Union[str, int, Name, KeywordArgument], value: Any):
         return self.set(key, value)
 
-    def get(self, item: Union[str, int]) -> Any:
-        item, continuation = map(toint, splitornone(item))
-        item = self._justget(item)
+    def get(self, key: Union[str, int, Name, KeywordArgument]) -> Any:
+        key, continuation = self._parsekey(key, reverse=False)
+        item = self._justgetone(key)
         return item if continuation is None else item.get(continuation)
 
-    def _justget(self, item: Union[str, int]) -> Any:
+    def getall(self, key: Union[str, Name]) -> Iterator[Any]:
+        key = key if isinstance(key, Name) else Name(key)
+        key, continuation = self._parsekey(key, reverse=False)
+        for match in self._justget(key, recursive=True):
+            yield match if continuation is None else match.get(continuation)
+
+    def _parsekey(self, key, reverse=False):
+        if isinstance(key, Name):
+            wrapper = call_if_arg_not_none(Name)
+            key = key.value
+        elif isinstance(key, KeywordArgument):
+            wrapper = call_if_arg_not_none(KeywordArgument)
+            key = key.value
+        else:
+            def wrapper(o):
+                return o
+        split = rsplitornone if reverse else splitornone
+        lhs, rhs = map(toint, split(key))
+        return wrapper(lhs), wrapper(rhs)
+
+    def _justgetone(self, key: Union[str, int, Name, KeywordArgument], recursive:bool=False) -> Any:
         try:
-            return self._getarg(item)
+            return next(self._justget(key, recursive=recursive))
+        except StopIteration:
+            raise KeyError(f"no item {key} in {self}")
+
+    def _justget(self, key: Union[str, int, Name, KeywordArgument], recursive: bool=False) -> Iterator[Any]:
+        try:
+            yield from self._getarg(key if not isinstance(key, KeywordArgument) else key.value)
         except (KeyError, IndexError):
-            return self._getnamed(item, recursive=True)
+            yield from self._getnamed(key if not isinstance(key, Name) else key.value, recursive=recursive)
 
-    def set(self, item: Union[str, int], value: Any) -> None:
-        getfirst, item = map(toint, rsplitornone(item))
-        node = self if getfirst is None else self._justget(getfirst)
-        return node._justset(item, value)
-        return item if continuation is None else item.get(continuation)
+    def set(self, key: Union[str, int, Name, KeywordArgument], value: Any) -> None:
+        getfirst, key = self._parsekey(key, reverse=True)
+        node = self if getfirst is None else self._justgetone(getfirst)
+        return node._justsetone(key, value)
 
-    def _justset(self, item: Union[str, int], value: Any) -> None:
+    def setall(self, key: Union[str, Name], value: Any):
+        key = key if isinstance(key, Name) else Name(key)
+        getfirst, key = self._parsekey(key, reverse=True)
+        node = (self,) if getfirst is None else self._justget(getfirst)
+        for n in node:
+            n._justset(key, value)
+
+    def _justsetone(self, key: Union[str, int, Name, KeywordArgument], value: Any) -> None:
+        return self._justset(key, value, recursive=False)
+
+    def _justset(self, key: Union[str, int, Name, KeywordArgument], value: Any, recursive: bool=True) -> None:
         try:
-            return self._setarg(item, value)
+            return self._setarg(key if not isinstance(key, KeywordArgument) else key.value, value)
         except (KeyError, IndexError):
-            return self._setnamed(item, value, recursive=True)
+            return self._setnamed(key if not isinstance(key, Name) else key.value, value, recursive=recursive)
 
-    def _getarg(self, item: Union[str, int]):
+    def _getarg(self, key: Union[str, int]) -> Iterator[Any]:
         try:
-            return self._args[item]
+            yield self._args[key]
         except TypeError:
             try:
-                return self._kwargs[item]
+                yield self._kwargs[key]
             except KeyError:
-                raise KeyError(f"{self} has no argument {item}")
+                raise KeyError(f"{self} has no argument {key}")
 
     def _setarg(self, key: Union[str, int], value: Any):
         try:
@@ -88,16 +129,15 @@ class FunctionNode:
                 if isinstance(n, FunctionNode)
                 )
 
-    def _getnamed(self, name: str, recursive: bool = True) -> "FunctionNode":
+    def _getnamed(self, name: str, recursive: bool = True) -> "Iterator[FunctionNode]":
         for _, a in self._iterchildnodes():
             with suppress(Exception):
                 if name == a.name:
-                    return a
+                    yield a
         if recursive:
             for _, a in self._iterchildnodes():
                 with suppress(Exception):
-                    return a._getnamed(name, recursive=recursive)
-        raise KeyError(f"{self} does not contain \"{name}\"")
+                    yield from a._getnamed(name, recursive=recursive)
 
     def _setnamed(self, name: str, value: Any, recursive: bool = True):
         found = False
@@ -106,6 +146,8 @@ class FunctionNode:
                 if name == a.name:
                     found = True
                     self[index] = value
+                    if not recursive:
+                        return
         if recursive:
             for index, a in self._iterchildnodes():
                 with suppress(Exception):
@@ -143,32 +185,4 @@ class FunctionNode:
         return deepcopy(self)
 
     def scan(self, arguments: Mapping[str, Any], name: Optional[str] = None):
-        result = []
-        newargs = (ziporraise(arguments.keys(), values) for values in ziporraise(*(arguments.values())))
-        for a in newargs:
-            clone = self.clone()
-            for k, v in a:
-                clone.set(k, v)
-            result.append(clone)
-        if name:
-            result = named(name, lambda *args: tuple(args), *result)
-        else:
-            result = fun(lambda *args: tuple(args), *result)
-        return result
-
-
-class NamedFunctionNode(FunctionNode):
-    def __init__(self, name: str, f: Callable[..., Any], *args: Any, **kwargs: Any):
-        super().__init__(f, *args, **kwargs)
-        self.name = name
-
-    def __repr__(self):
-        return f"NamedFunctionNode({self.name}, {self.f.__name__}, args={self.args}, kwargs={self.kwargs})"
-
-
-def named(name: str, f: Callable[..., Any], *args: Any, **kwargs: Any) -> NamedFunctionNode:
-    return NamedFunctionNode(name, f, *args, **kwargs)
-
-
-def fun(f: Callable[..., Any], *args: Any, **kwargs: Any) -> FunctionNode:
-    return FunctionNode(f, *args, **kwargs)
+        return scan.scan(self, arguments, name)
