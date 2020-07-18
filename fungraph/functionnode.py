@@ -122,6 +122,8 @@ class FunctionNode:
                 if name == a.name:
                     found = True
                     self[index] = value
+                    if not recursive:
+                        return
         if recursive:
             for index, a in self._iterchildnodes():
                 with suppress(Exception):
