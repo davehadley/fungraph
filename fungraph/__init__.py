@@ -10,6 +10,6 @@ __license__ = "MIT"
 __author__ = "David Hadley"
 url = "https://github.com/davehadley/fungraph"
 
-from fungraph.functionnode import fun, named
+from fungraph.factory import fun, named
 
 __all__ = ["fun", "named"]

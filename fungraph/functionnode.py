@@ -2,12 +2,13 @@ import itertools
 from contextlib import suppress
 from copy import deepcopy
 from types import MappingProxyType
-from typing import Callable, Any, Tuple, Dict, Optional, Union, Iterator, Mapping
+from typing import Callable, Any, Tuple, Optional, Union, Iterator, Mapping
 
 import graphchain
 import dask
 from dask import delayed
 
+from fungraph import factory
 from fungraph.internal.util import rsplitornone, splitornone, toint, ziporraise
 
 
@@ -151,24 +152,7 @@ class FunctionNode:
                 clone.set(k, v)
             result.append(clone)
         if name:
-            result = named(name, lambda *args: tuple(args), *result)
+            result = factory.named(name, lambda *args: tuple(args), *result)
         else:
-            result = fun(lambda *args: tuple(args), *result)
+            result = factory.fun(lambda *args: tuple(args), *result)
         return result
-
-
-class NamedFunctionNode(FunctionNode):
-    def __init__(self, name: str, f: Callable[..., Any], *args: Any, **kwargs: Any):
-        super().__init__(f, *args, **kwargs)
-        self.name = name
-
-    def __repr__(self):
-        return f"NamedFunctionNode({self.name}, {self.f.__name__}, args={self.args}, kwargs={self.kwargs})"
-
-
-def named(name: str, f: Callable[..., Any], *args: Any, **kwargs: Any) -> NamedFunctionNode:
-    return NamedFunctionNode(name, f, *args, **kwargs)
-
-
-def fun(f: Callable[..., Any], *args: Any, **kwargs: Any) -> FunctionNode:
-    return FunctionNode(f, *args, **kwargs)
