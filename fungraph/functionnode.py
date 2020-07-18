@@ -8,7 +8,7 @@ import graphchain
 import dask
 from dask import delayed
 
-from funstash.internal.util import ziporraise
+from fungraph.internal.util import rsplitornone, splitornone, toint, ziporraise
 
 
 def _context() -> dask.config.set:
@@ -16,29 +16,7 @@ def _context() -> dask.config.set:
                            delayed_optimize=graphchain.optimize)
 
 
-def _splitornone(item: str, delimiter: str = "/") -> Tuple[Any, Optional[str]]:
-    try:
-        first, second = item.split(delimiter, maxsplit=1)
-        return (first, second)
-    except:
-        return (item, None)
-
-
-def _rsplitornone(item: str, delimiter: str = "/") -> Tuple[Any, Optional[str]]:
-    try:
-        first, second = item.rsplit(delimiter, maxsplit=1)
-        return (first, second)
-    except:
-        return (None, item)
-
-
-def _toint(value: Any) -> Any:
-    with suppress(ValueError, TypeError):
-        value = int(value)
-    return value
-
-
-class Node:
+class FunctionNode:
 
     def __init__(self, f: Callable[..., Any], *args: Any, **kwargs: Any):
         self._f = f
@@ -64,7 +42,7 @@ class Node:
         return self.set(key, value)
 
     def get(self, item: Union[str, int]) -> Any:
-        item, continuation = map(_toint, _splitornone(item))
+        item, continuation = map(toint, splitornone(item))
         item = self._justget(item)
         return item if continuation is None else item.get(continuation)
 
@@ -75,7 +53,7 @@ class Node:
             return self._getnamed(item, recursive=True)
 
     def set(self, item: Union[str, int], value: Any) -> None:
-        getfirst, item = map(_toint, _rsplitornone(item))
+        getfirst, item = map(toint, rsplitornone(item))
         node = self if getfirst is None else self._justget(getfirst)
         return node._justset(item, value)
         return item if continuation is None else item.get(continuation)
@@ -105,12 +83,12 @@ class Node:
                 return
         raise KeyError(f"{self} has no argument {key}")
 
-    def _iterchildnodes(self) -> Iterator[Tuple[Union[str, int], "Node"]]:
+    def _iterchildnodes(self) -> Iterator[Tuple[Union[str, int], "FunctionNode"]]:
         return ((k, n) for k, n in itertools.chain(enumerate(self.args), self.kwargs.items())
-                if isinstance(n, Node)
+                if isinstance(n, FunctionNode)
                 )
 
-    def _getnamed(self, name: str, recursive: bool = True) -> "Node":
+    def _getnamed(self, name: str, recursive: bool = True) -> "FunctionNode":
         for _, a in self._iterchildnodes():
             with suppress(Exception):
                 if name == a.name:
@@ -154,12 +132,12 @@ class Node:
     def __call__(self):
         return self.compute()
 
-    def compute(self, cachedir: str = ".funstash") -> Any:
+    def compute(self, cachedir: str = ".fungraphcache") -> Any:
         with _context():
             return self.todelayed().compute(location=cachedir)
 
     def __repr__(self):
-        return f"AnonNode({self.f.__name__}, args={self.args}, kwargs={self.kwargs})"
+        return f"FunctionNode({self.f.__name__}, args={self.args}, kwargs={self.kwargs})"
 
     def clone(self):
         return deepcopy(self)
@@ -175,22 +153,22 @@ class Node:
         if name:
             result = named(name, lambda *args: tuple(args), *result)
         else:
-            result = node(lambda *args: tuple(args), *result)
+            result = fun(lambda *args: tuple(args), *result)
         return result
 
 
-class NamedNode(Node):
+class NamedFunctionNode(FunctionNode):
     def __init__(self, name: str, f: Callable[..., Any], *args: Any, **kwargs: Any):
         super().__init__(f, *args, **kwargs)
         self.name = name
 
     def __repr__(self):
-        return f"Node({self.name}, {self.f.__name__}, args={self.args}, kwargs={self.kwargs})"
+        return f"NamedFunctionNode({self.name}, {self.f.__name__}, args={self.args}, kwargs={self.kwargs})"
 
 
-def named(name: str, f: Callable[..., Any], *args: Any, **kwargs: Any) -> NamedNode:
-    return NamedNode(name, f, *args, **kwargs)
+def named(name: str, f: Callable[..., Any], *args: Any, **kwargs: Any) -> NamedFunctionNode:
+    return NamedFunctionNode(name, f, *args, **kwargs)
 
 
-def node(f: Callable[..., Any], *args: Any, **kwargs: Any) -> Node:
-    return Node(f, *args, **kwargs)
+def fun(f: Callable[..., Any], *args: Any, **kwargs: Any) -> FunctionNode:
+    return FunctionNode(f, *args, **kwargs)
