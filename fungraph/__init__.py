@@ -14,5 +14,6 @@ url = "https://github.com/davehadley/fungraph"
 from fungraph.nodefactory import fun, named, just
 from fungraph.name import Name
 from fungraph.keywordargument import KeywordArgument
+from fungraph import error
 
-__all__ = ["fun", "named", "just", "Name", "KeywordArgument"]
+__all__ = ["fun", "named", "just", "Name", "KeywordArgument", "error"]

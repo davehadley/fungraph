@@ -249,3 +249,7 @@ class TestFunctionNode(unittest.TestCase):
         self.assertGreater(tn1, 0.5)
         self.assertLess(tn2, 0.5)
         self.assertLess(tc1, 0.5)
+
+    def test_contructor_with_noncallable_raises_exception(self):
+        with self.assertRaises(fungraph.error.InvalidFunctionError):
+            fungraph.fun("not a function")
