@@ -21,14 +21,15 @@ f = fungraph.fun(add,
 )
 
 # parameter values may be retrieved
-print(f["x"])
-print(f["x/y"])
+print(f["x"]) # prints FunctionNode(mul, args=(), kwargs={'x': 1, 'y': 2})
+print(f["x"]["y"]) # prints 2
+print(f["x/y"]) # equivalent to the previous line
 
 # functions may be copied and modified
 g = f.clone()
 g["x/y"] = fungraph.fun(add, x=5, y=6)
-print(g.compute()) # prints 35
+print(g.compute()) # prints 23
 
 # recompute the function with many variations of a parameter
-scan = f.scan({"x":[0, 1, 2, 4]})
+scan = f.scan({"x":[0, 1, 2, 3]})
 print(scan.compute()) # prints (12, 13, 14, 15)
