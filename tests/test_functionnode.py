@@ -10,15 +10,12 @@ from typing import Any, Callable
 import cloudpickle
 
 import fungraph
+from tests.utils import timeonce
 
 
 def _slow_identity(x: Any, waitseconds: float = 1) -> Any:
     sleep(waitseconds)
     return x
-
-
-def _timeonce(f: Callable[[], Any]) -> float:
-    return timeit.timeit(f, number=1)
 
 
 def _add_xy(x: int, y: int):
@@ -100,8 +97,8 @@ class TestFunctionNode(unittest.TestCase):
         cachedir = tempfile.mkdtemp()
         node = fungraph.fun(_slow_identity, 5, waitseconds=1)
         f = lambda: node.compute(cachedir=cachedir)
-        t1 = _timeonce(f)
-        t2 = _timeonce(f)
+        t1 = timeonce(f)
+        t2 = timeonce(f)
         self.assertGreater(t1, 0.5)
         self.assertLess(t2, 0.5)
 
@@ -243,9 +240,9 @@ class TestFunctionNode(unittest.TestCase):
         clone = node.clone()
         nodefun = lambda: node.compute(cachedir=cachedir)
         clonefun = lambda: clone.compute(cachedir=cachedir)
-        tn1 = _timeonce(nodefun)
-        tn2 = _timeonce(nodefun)
-        tc1 = _timeonce(clonefun)
+        tn1 = timeonce(nodefun)
+        tn2 = timeonce(nodefun)
+        tc1 = timeonce(clonefun)
         self.assertGreater(tn1, 0.5)
         self.assertLess(tn2, 0.5)
         self.assertLess(tc1, 0.5)
