@@ -7,6 +7,14 @@ AnyNode = Union[FunctionNode, NamedFunctionNode]
 
 
 def named(name: str, f: Callable[..., Any], *args: Any, **kwargs: Any) -> NamedFunctionNode:
+    """ Does docs generate?
+
+    :param name:
+    :param f:
+    :param args:
+    :param kwargs:
+    :return:
+    """
     return NamedFunctionNode(name, f, *args, **kwargs)
 
 
