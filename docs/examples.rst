@@ -53,3 +53,4 @@ Dask delayed objects are valid inputs to :py:func:`fungraph.fun` :py:func:`fungr
 :py:class:`dask.Delayed` objects are used internally by :py:mod:`fungraph`. Thus you may use use dask features to scale computation (eg across a HPC cluster).
 
 .. literalinclude:: examples/dask_parallel.py
+
