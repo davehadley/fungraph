@@ -3,16 +3,30 @@ API
 
 .. automodule:: fungraph
 
-fungraph.FunctionNode
+fungraph.fun
 -------------------------------------
 
-.. autoclass:: fungraph.FunctionNode
-   :members:
+.. autofunction:: fungraph.fun
 
-fungraph.FunctionNode
+fungraph.named
 -------------------------------------
 
-.. autoclass:: fungraph.NamedFunctionNode
+.. autofunction:: fungraph.named
+
+
+FunctionNode
+-------------------------------------
+
+.. autoclass:: fungraph.functionnode.FunctionNode
    :members:
+   :undoc-members:
+
+NamedFunctionNode
+-------------------------------------
+
+.. autoclass:: fungraph.namedfunctionnode.NamedFunctionNode
+   :members:
+   :undoc-members:
+
 
 
