@@ -102,6 +102,31 @@ class TestFunctionNode(unittest.TestCase):
         self.assertGreater(t1, 0.5)
         self.assertLess(t2, 0.5)
 
+    def test_cache_new_object(self):
+        cachedir = tempfile.mkdtemp()
+        node1 = fungraph.fun(_slow_identity, 5, waitseconds=1)
+        f1 = lambda: node1.compute(cachedir=cachedir)
+        t1 = timeonce(f1)
+        node2 = fungraph.fun(_slow_identity, 5, waitseconds=1)
+        f2 = lambda: node2.compute(cachedir=cachedir)
+        t2 = timeonce(f2)
+        self.assertGreater(t1, 0.5)
+        self.assertLess(t2, 0.5)
+
+    def test_cache_nested(self):
+        cachedir = tempfile.mkdtemp()
+        node1 = fungraph.fun(_slow_identity, 5, waitseconds=1)
+        f1 = lambda: node1.compute(cachedir=cachedir)
+        t1 = timeonce(f1)
+        node2 = fungraph.fun(operator.add,
+                             fungraph.fun(_slow_identity, 5, waitseconds=1),
+                             fungraph.fun(_slow_identity, 5, waitseconds=1)
+                             )
+        f2 = lambda: node2.compute(cachedir=cachedir)
+        t2 = timeonce(f2)
+        self.assertGreater(t1, 0.5)
+        self.assertLess(t2, 0.5)
+
     def test_modify_arguments(self):
         node = fungraph.fun(operator.add, 2, 3)
         result1 = node.compute()
