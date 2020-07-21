@@ -2,12 +2,13 @@ import itertools
 from contextlib import suppress
 from copy import deepcopy
 from types import MappingProxyType
-from typing import Callable, Any, Tuple, Optional, Union, Iterator, Mapping
+from typing import Callable, Any, Tuple, Optional, Union, Iterator, Mapping, Dict, Hashable, Iterable, Container
 
-import graphchain
+import fs
 import dask
 from dask import delayed
 from dask.delayed import Delayed
+from graphchain.core import CachedComputation
 
 from fungraph.internal import scan
 from fungraph.internal.util import rsplitornone, splitornone, toint, call_if_arg_not_none
@@ -16,9 +17,30 @@ from fungraph.name import Name
 from fungraph.error import InvalidFunctionError
 
 
+# A hack to work around current limitation in PyPi version of graphchain
+# see: https://github.com/radix-ai/graphchain/issues/44
+def _optimize(
+        dsk: Dict[Hashable, Any],
+        keys: Optional[Union[Hashable, Iterable[Hashable]]] = None,
+        skip_keys: Optional[Container[Hashable]] = None,
+        location: Union[str, fs.base.FS] = "./__graphchain_cache__") \
+        -> Dict[Hashable, Any]:
+    dsk = deepcopy(dsk)
+    assert dask.core.isdag(dsk, list(dsk.keys()))
+    # Replace graph computations by CachedComputations.
+    skip_keys = skip_keys or set()
+    for key, computation in dsk.items():
+        dsk[key] = CachedComputation(
+            dsk, key, computation, location,
+            write_to_cache=False if key in skip_keys else 'auto')
+    # Remove task arguments if we can load from cache.
+    for key in dsk:
+        dsk[key].patch_computation_in_graph()
+    return dsk
+
+
 def _context() -> dask.config.set:
-    return dask.config.set(scheduler="sync",
-                           delayed_optimize=graphchain.optimize)
+    return dask.config.set(delayed_optimize=_optimize)
 
 
 class FunctionNode:
@@ -73,13 +95,13 @@ class FunctionNode:
         lhs, rhs = map(toint, split(key))
         return wrapper(lhs), wrapper(rhs)
 
-    def _justgetone(self, key: Union[str, int, Name, KeywordArgument], recursive:bool=False) -> Any:
+    def _justgetone(self, key: Union[str, int, Name, KeywordArgument], recursive: bool = False) -> Any:
         try:
             return next(self._justget(key, recursive=recursive))
         except StopIteration:
             raise KeyError(f"no item {key} in {self}")
 
-    def _justget(self, key: Union[str, int, Name, KeywordArgument], recursive: bool=False) -> Iterator[Any]:
+    def _justget(self, key: Union[str, int, Name, KeywordArgument], recursive: bool = False) -> Iterator[Any]:
         try:
             yield from self._getarg(key if not isinstance(key, KeywordArgument) else key.value)
         except (KeyError, IndexError):
@@ -100,7 +122,7 @@ class FunctionNode:
     def _justsetone(self, key: Union[str, int, Name, KeywordArgument], value: Any) -> None:
         return self._justset(key, value, recursive=False)
 
-    def _justset(self, key: Union[str, int, Name, KeywordArgument], value: Any, recursive: bool=True) -> None:
+    def _justset(self, key: Union[str, int, Name, KeywordArgument], value: Any, recursive: bool = True) -> None:
         try:
             return self._setarg(key if not isinstance(key, KeywordArgument) else key.value, value)
         except (KeyError, IndexError):
@@ -157,7 +179,7 @@ class FunctionNode:
         if not found:
             raise KeyError(f"{self} does not contain \"{name}\"")
 
-    def todelayed(self) -> delayed:
+    def todelayed(self) -> Delayed:
         args = []
         for a in self.args:
             if isinstance(a, FunctionNode):
