@@ -45,7 +45,4 @@ class TestDask(unittest.TestCase):
             jobs = fungraph.fun(lambda *args: np.sum(args), *args)
             t1 = timeonce(lambda : slowfunc(1.0))
             tn = timeonce(jobs.compute)
-            print(t1)
-            print(t1*N)
-            print(tn)
             self.assertLess(tn, (t1*N)/2.0)
