@@ -1,4 +1,5 @@
 import operator
+import tempfile
 import unittest
 
 import fungraph
@@ -200,3 +201,11 @@ class TestNamedFunctionNode(unittest.TestCase):
                               )
         node.setall("b", fungraph.named("c", lambda: 5))
         self.assertEqual(node.compute(), 1*5+3*5)
+
+    def test_identical_function(self):
+        cachedir = tempfile.mkdtemp()
+        f = fungraph.named("add", operator.add,
+                           fungraph.named("left", operator.mul, 2, 2),
+                           fungraph.named("right", operator.mul, 2, 2),
+                           )
+        self.assertEqual(f.compute(cachedir=cachedir), 8)
