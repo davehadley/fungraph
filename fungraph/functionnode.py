@@ -174,10 +174,19 @@ class FunctionNode:
             return self.todelayed().compute()
 
     def __repr__(self):
-        return f"FunctionNode({self.f.__name__}, args={self.args}, kwargs={self.kwargs})"
+        return f"FunctionNode({self._funcname}, args={self.args}, kwargs={self.kwargs})"
 
     def clone(self):
         return deepcopy(self)
 
     def scan(self, arguments: Mapping[str, Any], name: Optional[str] = None):
         return scan.scan(self, arguments, name)
+
+    @property
+    def _funcname(self) -> str:
+        if isinstance(self._f, Delayed):
+            return str(self._f.key)
+        try:
+            return self._f.__name__
+        except AttributeError:
+            return str(self._f)

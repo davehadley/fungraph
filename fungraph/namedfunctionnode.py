@@ -9,4 +9,4 @@ class NamedFunctionNode(FunctionNode):
         self.name = name
 
     def __repr__(self):
-        return f"NamedFunctionNode({self.name}, {self.f.__name__}, args={self.args}, kwargs={self.kwargs})"
+        return f"NamedFunctionNode({self.name}, {self._funcname}, args={self.args}, kwargs={self.kwargs})"

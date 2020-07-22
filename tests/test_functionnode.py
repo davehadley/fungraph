@@ -275,3 +275,7 @@ class TestFunctionNode(unittest.TestCase):
     def test_contructor_with_noncallable_raises_exception(self):
         with self.assertRaises(fungraph.error.InvalidFunctionError):
             fungraph.fun("not a function")
+
+    def test_repr(self):
+        node = fungraph.fun(operator.add, 1, 2)
+        str(node)

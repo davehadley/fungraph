@@ -46,3 +46,8 @@ class TestDask(unittest.TestCase):
             t1 = timeonce(lambda : slowfunc(1.0))
             tn = timeonce(jobs.compute)
             self.assertLess(tn, (t1*N)/2.0)
+
+    def test_repr(self):
+        node = fungraph.fun(delayed(operator.add), 2, 3)
+        str(node)
+        return
