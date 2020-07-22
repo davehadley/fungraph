@@ -96,7 +96,7 @@ class TestFunctionNode(unittest.TestCase):
     def test_cache(self):
         cachedir = tempfile.mkdtemp()
         node = fungraph.fun(_slow_identity, 5, waitseconds=1)
-        f = lambda: node.compute(cachedir=cachedir)
+        f = lambda: node.compute(cache=cachedir)
         t1 = timeonce(f)
         t2 = timeonce(f)
         self.assertGreater(t1, 0.5)
@@ -105,10 +105,10 @@ class TestFunctionNode(unittest.TestCase):
     def test_cache_new_object(self):
         cachedir = tempfile.mkdtemp()
         node1 = fungraph.fun(_slow_identity, 5, waitseconds=1)
-        f1 = lambda: node1.compute(cachedir=cachedir)
+        f1 = lambda: node1.compute(cache=cachedir)
         t1 = timeonce(f1)
         node2 = fungraph.fun(_slow_identity, 5, waitseconds=1)
-        f2 = lambda: node2.compute(cachedir=cachedir)
+        f2 = lambda: node2.compute(cache=cachedir)
         t2 = timeonce(f2)
         self.assertGreater(t1, 0.5)
         self.assertLess(t2, 0.5)
@@ -116,13 +116,13 @@ class TestFunctionNode(unittest.TestCase):
     def test_cache_nested(self):
         cachedir = tempfile.mkdtemp()
         node1 = fungraph.fun(_slow_identity, 5, waitseconds=1)
-        f1 = lambda: node1.compute(cachedir=cachedir)
+        f1 = lambda: node1.compute(cache=cachedir)
         t1 = timeonce(f1)
         node2 = fungraph.fun(operator.add,
                              fungraph.fun(_slow_identity, 5, waitseconds=1),
                              fungraph.fun(_slow_identity, 5, waitseconds=1)
                              )
-        f2 = lambda: node2.compute(cachedir=cachedir)
+        f2 = lambda: node2.compute(cache=cachedir)
         t2 = timeonce(f2)
         self.assertGreater(t1, 0.5)
         self.assertLess(t2, 0.5)
@@ -263,8 +263,8 @@ class TestFunctionNode(unittest.TestCase):
                             fungraph.fun(_slow_identity, 3, waitseconds=1),
                             )
         clone = node.clone()
-        nodefun = lambda: node.compute(cachedir=cachedir)
-        clonefun = lambda: clone.compute(cachedir=cachedir)
+        nodefun = lambda: node.compute(cache=cachedir)
+        clonefun = lambda: clone.compute(cache=cachedir)
         tn1 = timeonce(nodefun)
         tn2 = timeonce(nodefun)
         tc1 = timeonce(clonefun)

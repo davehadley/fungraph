@@ -197,9 +197,9 @@ class FunctionNode:
     def __call__(self):
         return self.compute()
 
-    def compute(self, cachedir: str = ".fungraphcache") -> Any:
+    def compute(self, cache: Union[str, Mapping[str, Any], None] = ".fungraphcache") -> Any:
         with _context():
-            return self.todelayed().compute(location=cachedir)
+            return self.todelayed().compute(location=cache)
 
     def __repr__(self):
         return f"FunctionNode({self.f.__name__}, args={self.args}, kwargs={self.kwargs})"

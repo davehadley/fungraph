@@ -208,4 +208,4 @@ class TestNamedFunctionNode(unittest.TestCase):
                            fungraph.named("left", operator.mul, 2, 2),
                            fungraph.named("right", operator.mul, 2, 2),
                            )
-        self.assertEqual(f.compute(cachedir=cachedir), 8)
+        self.assertEqual(f.compute(cache=cachedir), 8)
