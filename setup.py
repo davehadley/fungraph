@@ -10,7 +10,7 @@ with open("fungraph/_version.py") as fp:
 
 setup(name="fungraph",
       version=version,
-      description="Graph of lazily evaluated functions with Automatically Cached Intermediates",
+      description="Graph of lazily evaluated functions with automatically cached intermediates",
       long_description=long_description,
       long_description_content_type="text/markdown",
       url="https://github.com/davehadley/fungraph",
@@ -18,7 +18,7 @@ setup(name="fungraph",
       author_email="d.r.hadley@warwick.ac.uk",
       license="MIT",
       packages=["fungraph", "fungraph.internal"],
-      install_requires=["dask>=2.20.0", "graphchain>=1.1.0", "toolz>=0.10.0", "distributed>=2.20.0", ],
+      install_requires=["dask>=2.20.0", "cloudpickle>=1.4.1", "filelock>=3.0.12", "toolz>=0.10.0", "distributed>=2.20.0", ],
       zip_safe=True,
       classifiers=[
           "Programming Language :: Python :: 3 :: Only",
