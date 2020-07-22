@@ -7,9 +7,6 @@ Features include:
 * Intermediate values are automatically cached.
 * Results and arguments of all nodes in the graph are retrievable from the root node. 
 * The graph is mutable allowing easy re-computation of the graph with modified function arguments.
-
-Dependencies:
 * [dask](https://dask.org/ "Dask") provides delayed functions. As all functions are dask.delayed, you can use dask features to scale computation (eg across a HPC cluster).
-* [graphchain](https://pypi.org/project/graphchain/ "GraphChain") is used to provide automatic caching to disk.
 
 See the documentation at <https://fungraph.readthedocs.io>.

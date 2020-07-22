@@ -5,6 +5,6 @@ recommonmark>=0.6.0
 numpydoc>=1.0.0
 
 dask>=2.20.0
-graphchain>=1.1.0
 cloudpickle>=1.4.1
 toolz>=0.10.0
+filelock>=3.0.12
