@@ -33,3 +33,10 @@ print(g.compute()) # prints 23
 # recompute the function with many variations of a parameter
 scan = f.scan({"x":[0, 1, 2, 3]})
 print(scan.compute()) # prints (12, 13, 14, 15)
+
+# complex graphs may benefit from named functions
+f = fungraph.named("add", add,
+                   fungraph.named("left", mul, x=1, y=2),
+                   fungraph.named("right", mul, x=3, y=4),
+                   )
+print(f["left"]) # prints: NamedFunctionNode(left, mul, args=(), kwargs={'x': 1, 'y': 2})
