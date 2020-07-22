@@ -1,3 +1,4 @@
+dask-worker-space/
 .idea/
 .fungraphcache/
 *.bak
