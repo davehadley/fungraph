@@ -33,19 +33,20 @@ class TestDask(unittest.TestCase):
 
     def test_paralell(self):
         cluster = dask.distributed.LocalCluster(n_workers=8,
-                               processes=True,
-                               threads_per_worker=1,
-                               memory_limit="auto")
+                                                processes=True,
+                                                threads_per_worker=1,
+                                                memory_limit="auto")
         with dask.distributed.Client(address=cluster):
             def slowfunc(loc):
                 time.sleep(1)
                 return np.random.normal(loc)
+
             N = 8
             args = [fungraph.fun(slowfunc, np.random.uniform()) for _ in range(N)]
             jobs = fungraph.fun(lambda *args: np.sum(args), *args)
-            t1 = timeonce(lambda : slowfunc(1.0))
+            t1 = timeonce(lambda: slowfunc(1.0))
             tn = timeonce(jobs.compute)
-            self.assertLess(tn, (t1*N)/2.0)
+            self.assertLess(tn, (t1 * N) / 2.0)
 
     def test_repr(self):
         node = fungraph.fun(delayed(operator.add), 2, 3)

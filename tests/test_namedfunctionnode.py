@@ -200,7 +200,7 @@ class TestNamedFunctionNode(unittest.TestCase):
                                              )
                               )
         node.setall("b", fungraph.named("c", lambda: 5))
-        self.assertEqual(node.compute(), 1*5+3*5)
+        self.assertEqual(node.compute(), 1 * 5 + 3 * 5)
 
     def test_identical_function(self):
         cachedir = tempfile.mkdtemp()

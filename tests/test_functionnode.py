@@ -2,10 +2,9 @@ import operator
 import pickle
 import shelve
 import tempfile
-import timeit
 import unittest
 from time import sleep
-from typing import Any, Callable
+from typing import Any
 
 import cloudpickle
 
