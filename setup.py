@@ -17,7 +17,7 @@ setup(name="fungraph",
       author="David Hadley",
       author_email="d.r.hadley@warwick.ac.uk",
       license="MIT",
-      packages=find_packages(exclude=["tests"]),
+      packages=find_packages(include=["fungraph*"]),
       install_requires=["dask>=2.20.0", "graphchain>=1.1.0", "toolz>=0.10.0", "distributed>=2.20.0", ],
       zip_safe=True,
       classifiers=[
