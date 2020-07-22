@@ -2,45 +2,17 @@ import itertools
 from contextlib import suppress
 from copy import deepcopy
 from types import MappingProxyType
-from typing import Callable, Any, Tuple, Optional, Union, Iterator, Mapping, Dict, Hashable, Iterable, Container
+from typing import Callable, Any, Tuple, Optional, Union, Iterator, Mapping
 
-import fs
-import dask
 from dask import delayed
 from dask.delayed import Delayed
-from graphchain.core import CachedComputation
 
 from fungraph.internal import scan
+from fungraph.internal.cache import cachecontext
 from fungraph.internal.util import rsplitornone, splitornone, toint, call_if_arg_not_none
 from fungraph.keywordargument import KeywordArgument
 from fungraph.name import Name
 from fungraph.error import InvalidFunctionError
-
-
-# A hack to work around current limitation in PyPi version of graphchain
-# see: https://github.com/radix-ai/graphchain/issues/44
-def _optimize(
-        dsk: Dict[Hashable, Any],
-        keys: Optional[Union[Hashable, Iterable[Hashable]]] = None,
-        skip_keys: Optional[Container[Hashable]] = None,
-        location: Union[str, fs.base.FS] = ".fungraphcache") \
-        -> Dict[Hashable, Any]:
-    dsk = deepcopy(dsk)
-    assert dask.core.isdag(dsk, list(dsk.keys()))
-    # Replace graph computations by CachedComputations.
-    skip_keys = skip_keys or set()
-    for key, computation in dsk.items():
-        dsk[key] = CachedComputation(
-            dsk, key, computation, location,
-            write_to_cache=False if key in skip_keys else 'auto')
-    # Remove task arguments if we can load from cache.
-    for key in dsk:
-        dsk[key].patch_computation_in_graph()
-    return dsk
-
-
-def _context() -> dask.config.set:
-    return dask.config.set(delayed_optimize=_optimize)
 
 
 class FunctionNode:
@@ -198,8 +170,8 @@ class FunctionNode:
         return self.compute()
 
     def compute(self, cache: Union[str, Mapping[str, Any], None] = ".fungraphcache") -> Any:
-        with _context():
-            return self.todelayed().compute(location=cache)
+        with cachecontext(cache):
+            return self.todelayed().compute()
 
     def __repr__(self):
         return f"FunctionNode({self.f.__name__}, args={self.args}, kwargs={self.kwargs})"
