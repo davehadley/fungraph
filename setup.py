@@ -10,7 +10,7 @@ with open("fungraph/_version.py") as fp:
 
 setup(name="fungraph",
       version=version,
-      description="Graph of lazily evaluated functions with Automatically Cached Intermediates",
+      description="Graph of lazily evaluated functions with automatically cached intermediates",
       long_description=long_description,
       long_description_content_type="text/markdown",
       url="https://github.com/davehadley/fungraph",
