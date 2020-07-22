@@ -23,7 +23,7 @@ def _optimize(
         dsk: Dict[Hashable, Any],
         keys: Optional[Union[Hashable, Iterable[Hashable]]] = None,
         skip_keys: Optional[Container[Hashable]] = None,
-        location: Union[str, fs.base.FS] = "./__graphchain_cache__") \
+        location: Union[str, fs.base.FS] = ".fungraphcache") \
         -> Dict[Hashable, Any]:
     dsk = deepcopy(dsk)
     assert dask.core.isdag(dsk, list(dsk.keys()))
