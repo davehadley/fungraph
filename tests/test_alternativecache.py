@@ -18,6 +18,15 @@ class TestFunctionNodeWithAlternativeCache(unittest.TestCase):
         f.compute(cache=cache)
         self.assertEqual(list(cache.values())[0], 3)
 
+    def test_cache_compute_dict_speed(self):
+        f = fungraph.fun(_slow_func, 1, 2)
+        cache = dict()
+        t1 = timeonce(lambda : f.compute(cache=cache))
+        t2 = timeonce(lambda: f.compute(cache=cache))
+        self.assertGreater(t1, 0.5)
+        self.assertLess(t2, 0.5)
+
+
     def test_cache_compute_none(self):
         f = fungraph.fun(_slow_func, 1, 2)
         t1 = timeonce(lambda : f.compute(cache=None))
