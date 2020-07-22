@@ -18,7 +18,7 @@ setup(name="fungraph",
       author_email="d.r.hadley@warwick.ac.uk",
       license="MIT",
       packages=find_packages(),
-      install_requires=["dask>=2.20.0", "graphchain>=1.1.0"],
+      install_requires=["dask>=2.20.0", "graphchain>=1.1.0", "toolz>=0.10.0"],
       zip_safe=True,
       classifiers=[
           "Programming Language :: Python :: 3 :: Only",
