@@ -9,7 +9,8 @@ from fungraph.internal.lockedcache import LockedCache
 
 def cachecontext(cache: Union[str, Mapping[str, Any], None] = None) -> Callback:
     if cache is None:
-        cache = ".fungraphcache"
+        # null callback, does nothing
+        return Callback()
     if isinstance(cache, str):
         cache = LockedCache(cache)
     return Cache(cache)
