@@ -6,10 +6,12 @@ from dask.callbacks import Callback
 
 from fungraph.internal.lockedcache import LockedCache
 
+DEFAULT_CACHE_PATH = ".fungraphcache"
 
-def cachecontext(cache: Union[str, Mapping[str, Any], None] = None) -> Callback:
+
+def cachecontext(cache: Union[str, Mapping[str, Any], None] = DEFAULT_CACHE_PATH) -> Callback:
     if cache is None:
-        # null callback, does nothing
+        # null callback, does no caching
         return Callback()
     if isinstance(cache, str):
         cache = LockedCache(cache)

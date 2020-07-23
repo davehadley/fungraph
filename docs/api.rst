@@ -19,6 +19,7 @@ FunctionNode
 
 .. autoclass:: fungraph.functionnode.FunctionNode
    :members:
+   :special-members:
    :undoc-members:
 
 NamedFunctionNode

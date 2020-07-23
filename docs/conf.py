@@ -35,7 +35,6 @@ extensions = [
     'sphinx_rtd_theme',
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
-    'matplotlib.sphinxext.plot_directive',
     'numpydoc',
 ]
 
@@ -60,7 +59,4 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 intersphinx_mapping = {
-    'boost_histogram': ('https://fungraph.readthedocs.io/en/latest/', None),
-    'numpy': ('http://docs.scipy.org/doc/numpy/', None),
-    'matplotlib': ('https://matplotlib.org/', None),
 }

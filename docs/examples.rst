@@ -5,7 +5,7 @@ Examples
 
 A single function
 -----------------
-Construct functions with the :py:func:`fungraph.fun`. Evaluate them with :py:meth:`fungraph.functionnode.FunctionNode.compute`.
+Construct functions with the :py:func:`fungraph.fun`. Evaluate them by calling the :py:class:`fungraph.functionnode.FunctionNode` object returned by :py:func:`fungraph.fun`.
 
 .. literalinclude:: examples/simple_add.py
 
@@ -54,3 +54,11 @@ Dask delayed objects are valid inputs to :py:func:`fungraph.fun` :py:func:`fungr
 
 .. literalinclude:: examples/dask_parallel.py
 
+Automatic Caching
+-----------------
+
+:py:mod:`fungraph` results and intermediate values are automatically cached.
+If the default caching method is not suitable for your use case (or you simply don't want to cache the results)
+you may evaluate the results with :py:meth:`fungraph.functionnode.FunctionNode.compute`.
+
+.. literalinclude:: examples/custom_caching.py
