@@ -187,6 +187,7 @@ class FunctionNode:
             raise KeyError(f"{self} does not contain \"{name}\"")
 
     def todelayed(self) -> Delayed:
+        """Convert this function node to a dask delayed object."""
         args = []
         for a in self.args:
             if isinstance(a, FunctionNode):
