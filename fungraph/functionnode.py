@@ -7,8 +7,8 @@ from typing import Callable, Any, Tuple, Optional, Union, Iterator, Mapping
 from dask import delayed
 from dask.delayed import Delayed
 
+from fungraph.cache import DEFAULT_CACHE_PATH, cachecontext
 from fungraph.internal import scan
-from fungraph.internal.cache import cachecontext
 from fungraph.internal.util import rsplitornone, splitornone, toint, call_if_arg_not_none
 from fungraph.keywordargument import KeywordArgument
 from fungraph.name import Name
@@ -166,13 +166,13 @@ class FunctionNode:
         result = delayed(self.f)(*args, **kwargs)
         return result
 
-    def __call__(self, cache: Union[str, Mapping[str, Any], None] = ".fungraphcache"):
+    def __call__(self, cache: Union[str, Mapping[str, Any], None] = DEFAULT_CACHE_PATH):
         return self.cachedcompute(cache=cache)
 
     def compute(self, *args: Any, **kwargs: Any) -> Any:
         return self.todelayed().compute(*args, **kwargs)
 
-    def cachedcompute(self, cache: Union[str, Mapping[str, Any], None] = ".fungraphcache") -> Any:
+    def cachedcompute(self, cache: Union[str, Mapping[str, Any], None] = DEFAULT_CACHE_PATH) -> Any:
         with cachecontext(cache):
             return self.todelayed().compute()
 

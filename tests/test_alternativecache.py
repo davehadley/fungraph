@@ -18,6 +18,13 @@ class TestFunctionNodeWithAlternativeCache(unittest.TestCase):
         f.cachedcompute(cache=cache)
         self.assertEqual(list(cache.values())[0], 3)
 
+    def test_cache_compute_dict_with_contextmanager(self):
+        f = fungraph.fun(operator.add, 1, 2)
+        cache = dict()
+        with fungraph.cachecontext(cache=cache):
+            f.compute()
+        self.assertEqual(list(cache.values())[0], 3)
+
     def test_cache_compute_dict_speed(self):
         f = fungraph.fun(_slow_func, 1, 2)
         cache = dict()
@@ -31,4 +38,10 @@ class TestFunctionNodeWithAlternativeCache(unittest.TestCase):
         f = fungraph.fun(_slow_func, 1, 2)
         t1 = timeonce(lambda : f.cachedcompute(cache=None))
         t2 = timeonce(lambda : f.cachedcompute(cache=None))
+        self.assertAlmostEqual(t1, t2, delta=0.1)
+
+    def test_nocache_compute_none(self):
+        f = fungraph.fun(_slow_func, 1, 2)
+        t1 = timeonce(lambda : f.compute())
+        t2 = timeonce(lambda : f.compute())
         self.assertAlmostEqual(t1, t2, delta=0.1)

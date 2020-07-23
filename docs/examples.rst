@@ -54,3 +54,11 @@ Dask delayed objects are valid inputs to :py:func:`fungraph.fun` :py:func:`fungr
 
 .. literalinclude:: examples/dask_parallel.py
 
+Automatic Caching
+-----------------
+
+:py:mod:`fungraph` results and intermediate values are automatically cached.
+If the default caching method is not suitable for your use case (or you simply don't want to cache the results)
+you may evaluate the results with :py:meth:`fungraph.functionnode.FunctionNode.compute`.
+
+.. literalinclude:: examples/custom_caching.py
