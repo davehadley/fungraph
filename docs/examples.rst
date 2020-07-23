@@ -5,7 +5,7 @@ Examples
 
 A single function
 -----------------
-Construct functions with the :py:func:`fungraph.fun`. Evaluate them with :py:meth:`fungraph.functionnode.FunctionNode.compute`.
+Construct functions with the :py:func:`fungraph.fun`. Evaluate them by calling the :py:class:`fungraph.functionnode.FunctionNode` object returned by :py:func:`fungraph.fun`.
 
 .. literalinclude:: examples/simple_add.py
 

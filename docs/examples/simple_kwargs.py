@@ -6,4 +6,4 @@ def add(x, y):
 
 if __name__ == '__main__':
     f = fungraph.fun(add, 1, y=2)
-    print(f.compute())  # prints 3
+    print(f())  # prints 3

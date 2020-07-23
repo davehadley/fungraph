@@ -166,10 +166,13 @@ class FunctionNode:
         result = delayed(self.f)(*args, **kwargs)
         return result
 
-    def __call__(self):
-        return self.compute()
+    def __call__(self, cache: Union[str, Mapping[str, Any], None] = ".fungraphcache"):
+        return self.cachedcompute(cache=cache)
 
-    def compute(self, cache: Union[str, Mapping[str, Any], None] = ".fungraphcache") -> Any:
+    def compute(self, *args: Any, **kwargs: Any) -> Any:
+        return self.todelayed().compute(*args, **kwargs)
+
+    def cachedcompute(self, cache: Union[str, Mapping[str, Any], None] = ".fungraphcache") -> Any:
         with cachecontext(cache):
             return self.todelayed().compute()
 
