@@ -7,4 +7,4 @@ if __name__ == '__main__':
                      fungraph.fun(operator.mul, 1, 2),
                      fungraph.fun(operator.mul, 3, 4),
                      )
-    print(f.compute())  # prints 14
+    print(f())  # prints 14

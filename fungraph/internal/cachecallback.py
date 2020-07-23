@@ -1,22 +1,10 @@
 import hashlib
-from typing import Union, Mapping, Any
 
 import cloudpickle
 from dask.callbacks import Callback
 
-from fungraph.internal.lockedcache import LockedCache
 
-
-def cachecontext(cache: Union[str, Mapping[str, Any], None] = None) -> Callback:
-    if cache is None:
-        # null callback, does nothing
-        return Callback()
-    if isinstance(cache, str):
-        cache = LockedCache(cache)
-    return Cache(cache)
-
-
-class Cache(Callback):
+class CacheCallback(Callback):
 
     def __init__(self, cache):
         super().__init__()

@@ -4,4 +4,5 @@ mkdir testrelease && cd testrelease
 python3 -m venv venvrelease
 source venvrelease/bin/activate
 pip install --no-cache-dir --upgrade "fungraph>=${version}"
-python -m unittest discover ../tests
+cp -r ../tests ./
+python -m unittest discover tests

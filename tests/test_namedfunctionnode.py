@@ -15,7 +15,7 @@ class TestNamedFunctionNode(unittest.TestCase):
 
     def test_simple_named_graph(self):
         node = fungraph.named("add", operator.add, 1, 2)
-        self.assertEqual(node.compute(), 3)
+        self.assertEqual(node.cachedcompute(), 3)
         self.assertEqual(node.name, "add")
         return
 
@@ -26,8 +26,8 @@ class TestNamedFunctionNode(unittest.TestCase):
                               )
         a = node["a"]
         b = node["b"]
-        self.assertEqual(a.compute(), 1)
-        self.assertEqual(b.compute(), 2)
+        self.assertEqual(a.cachedcompute(), 1)
+        self.assertEqual(b.cachedcompute(), 2)
         self.assertEqual(a.name, "a")
         self.assertEqual(b.name, "b")
         return
@@ -39,7 +39,7 @@ class TestNamedFunctionNode(unittest.TestCase):
                               )
         aprime = fungraph.named("aprime", lambda: 3)
         node["a"] = aprime
-        self.assertEqual(node.compute(), 5)
+        self.assertEqual(node.cachedcompute(), 5)
         with self.assertRaises(KeyError):
             node["a"]
         return
@@ -68,8 +68,8 @@ class TestNamedFunctionNode(unittest.TestCase):
                             fungraph.named("b", lambda: 2),
                             )
         b = node["b"]
-        self.assertEqual(node.compute(), 3)
-        self.assertEqual(b.compute(), 2)
+        self.assertEqual(node.cachedcompute(), 3)
+        self.assertEqual(b.cachedcompute(), 2)
         self.assertEqual(b.name, "b")
         return
 
@@ -80,8 +80,8 @@ class TestNamedFunctionNode(unittest.TestCase):
                             )
         x = node["x"]
         # return first found result
-        self.assertEqual(node.compute(), 3)
-        self.assertEqual(x.compute(), 1)
+        self.assertEqual(node.cachedcompute(), 3)
+        self.assertEqual(x.cachedcompute(), 1)
         self.assertEqual(x.name, "x")
         return
 
@@ -92,7 +92,7 @@ class TestNamedFunctionNode(unittest.TestCase):
                             )
         node["x"] = fungraph.named("x", lambda: 3)
         # set first found result
-        self.assertEqual(node.compute(), 5)
+        self.assertEqual(node.cachedcompute(), 5)
         return
 
     def test_get_nameclash_with_kwargument(self):
@@ -102,8 +102,8 @@ class TestNamedFunctionNode(unittest.TestCase):
                             )
         x = node["x"]
         # prefer arguments over named
-        self.assertEqual(node.compute(), 3)
-        self.assertEqual(x.compute(), 1)
+        self.assertEqual(node.cachedcompute(), 3)
+        self.assertEqual(x.cachedcompute(), 1)
         self.assertEqual(x.name, "y")
         return
 
@@ -114,7 +114,7 @@ class TestNamedFunctionNode(unittest.TestCase):
                             )
         node["x"] = fungraph.named("z", lambda: 3)
         # prefer arguments over named
-        self.assertEqual(node.compute(), 5)
+        self.assertEqual(node.cachedcompute(), 5)
         return
 
     def test_get_nameclash_with_kwargument_explicit(self):
@@ -124,9 +124,9 @@ class TestNamedFunctionNode(unittest.TestCase):
                             )
         x = node[fungraph.Name("x")]
         y = node[fungraph.KeywordArgument("x")]
-        self.assertEqual(x.compute(), 2)
+        self.assertEqual(x.cachedcompute(), 2)
         self.assertEqual(x.name, "x")
-        self.assertEqual(y.compute(), 1)
+        self.assertEqual(y.cachedcompute(), 1)
         self.assertEqual(y.name, "y")
         return
 
@@ -137,9 +137,9 @@ class TestNamedFunctionNode(unittest.TestCase):
                             )
         node[fungraph.Name("x")] = fungraph.named("z", lambda: 3)
         node[fungraph.KeywordArgument("x")] = fungraph.named("w", lambda: 4)
-        self.assertEqual(node["x"].compute(), 4)
+        self.assertEqual(node["x"].cachedcompute(), 4)
         self.assertEqual(node["x"].name, "w")
-        self.assertEqual(node["y"].compute(), 3)
+        self.assertEqual(node["y"].cachedcompute(), 3)
         self.assertEqual(node["y"].name, "z")
         return
 
@@ -154,10 +154,10 @@ class TestNamedFunctionNode(unittest.TestCase):
         two = node["mul1/two"]
         three = node["mul2/three"]
         four = node["mul2/four"]
-        self.assertEqual(one.compute(), 1)
-        self.assertEqual(two.compute(), 2)
-        self.assertEqual(three.compute(), 3)
-        self.assertEqual(four.compute(), 4)
+        self.assertEqual(one.cachedcompute(), 1)
+        self.assertEqual(two.cachedcompute(), 2)
+        self.assertEqual(three.cachedcompute(), 3)
+        self.assertEqual(four.cachedcompute(), 4)
         return
 
     def test_set_by_path(self):
@@ -171,7 +171,7 @@ class TestNamedFunctionNode(unittest.TestCase):
         node["mul1/two"] = fungraph.named("size", lambda: 6)
         node["mul2/three"] = fungraph.named("seven", lambda: 7)
         node["mul2/four"] = fungraph.named("eight", lambda: 8)
-        self.assertEqual(node.compute(), 5 * 6 + 7 * 8)
+        self.assertEqual(node.cachedcompute(), 5 * 6 + 7 * 8)
         return
 
     def test_get_all(self):
@@ -186,7 +186,7 @@ class TestNamedFunctionNode(unittest.TestCase):
                                              )
                               )
         bs = node.getall("b")
-        self.assertEqual([b.compute() for b in bs], [2, 4])
+        self.assertEqual([b.cachedcompute() for b in bs], [2, 4])
 
     def test_set_all(self):
         node = fungraph.named("add", operator.add,
@@ -200,7 +200,7 @@ class TestNamedFunctionNode(unittest.TestCase):
                                              )
                               )
         node.setall("b", fungraph.named("c", lambda: 5))
-        self.assertEqual(node.compute(), 1 * 5 + 3 * 5)
+        self.assertEqual(node.cachedcompute(), 1 * 5 + 3 * 5)
 
     def test_identical_function(self):
         cachedir = tempfile.mkdtemp()
@@ -208,7 +208,7 @@ class TestNamedFunctionNode(unittest.TestCase):
                            fungraph.named("left", operator.mul, 2, 2),
                            fungraph.named("right", operator.mul, 2, 2),
                            )
-        self.assertEqual(f.compute(cache=cachedir), 8)
+        self.assertEqual(f.cachedcompute(cache=cachedir), 8)
 
     def test_repr(self):
         name = "name"

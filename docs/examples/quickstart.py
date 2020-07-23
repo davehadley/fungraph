@@ -8,11 +8,12 @@ def mul(x, y):
 
 # contruct a function with positional arguments
 f = fungraph.fun(add, 1, 2)
+
 # construct a function with keyword arguments
 f = fungraph.fun(add, x=1, y=2)
 
-# functions are lazily evaluated
-print(f.compute()) # prints 3
+# call f to get the result
+print(f()) # prints 3
 
 # functions may be nested
 f = fungraph.fun(add,
@@ -28,11 +29,11 @@ print(f["x/y"]) # equivalent to the previous line
 # functions may be copied and modified
 g = f.clone()
 g["x/y"] = fungraph.fun(add, x=5, y=6)
-print(g.compute()) # prints 23
+print(g()) # prints 23
 
 # recompute the function with many variations of a parameter
 scan = f.scan({"x":[0, 1, 2, 3]})
-print(scan.compute()) # prints (12, 13, 14, 15)
+print(scan()) # prints (12, 13, 14, 15)
 
 # complex graphs may benefit from named functions
 f = fungraph.named("add", add,

@@ -27,7 +27,7 @@ def main():
     f = fungraph.fun(addmany, *args)
     #print(timeit(f.compute)) # would take about 8 seconds
     with localclient():
-        print(timeit(f.compute, number=1)) # should take about 1 second
+        print(timeit(lambda : f(), number=1)) # should take about 1 second
 
 
 if __name__ == '__main__':
