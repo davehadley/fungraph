@@ -1,6 +1,11 @@
-"""fungraph
+"""fungraph provides an API to build and explore a graph of lazily evaluated functions.
 
-Lazily evaluated mutable graph of functions with automatically cached intermediate values.
+fungraph features include:
+
+* Compose a Directed Acyclic Graph (DAG) of lazily evaluated functions.
+* Intermediate values are automatically cached for fast iteration during exploration of data and analysis development.
+* Results and arguments of all nodes in the graph are retrievable from the root node.
+* The graph is cloneable and mutable allowing easy re-computation of the graph with modified function arguments.
 
 """
 

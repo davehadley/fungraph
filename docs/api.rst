@@ -1,14 +1,12 @@
 API
 ==========
 
-.. automodule:: fungraph
-
-fungraph.fun
+fun
 -------------------------------------
 
 .. autofunction:: fungraph.fun
 
-fungraph.named
+named
 -------------------------------------
 
 .. autofunction:: fungraph.named
@@ -19,15 +17,24 @@ FunctionNode
 
 .. autoclass:: fungraph.functionnode.FunctionNode
    :members:
-   :special-members:
-   :undoc-members:
 
 NamedFunctionNode
 -------------------------------------
 
 .. autoclass:: fungraph.namedfunctionnode.NamedFunctionNode
    :members:
-   :undoc-members:
+
+cachecontext
+-------------------------------------
+
+.. autofunction:: fungraph.cachecontext
 
 
+Utilities
+-------------------------------------
 
+.. autoclass:: fungraph.Name
+
+.. autoclass:: fungraph.KeywordArgument
+
+.. autofunction:: fungraph.just
