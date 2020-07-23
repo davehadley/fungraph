@@ -62,3 +62,10 @@ If the default caching method is not suitable for your use case (or you simply d
 you may evaluate the results with :py:meth:`fungraph.functionnode.FunctionNode.compute`.
 
 .. literalinclude:: examples/custom_caching.py
+
+Named functions
+---------------
+
+With complex function graphs, it may be helpful to name the functions.
+
+.. literalinclude:: examples/simple_named.py
