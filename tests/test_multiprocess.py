@@ -17,11 +17,13 @@ def _slow_add(a, b, waitseconds=1):
 def _timenodeonce(node, cachedir):
     return timeonce(lambda: node.cachedcompute(cache=cachedir))
 
+
 def _test_add():
     cachedir = os.sep.join((tempfile.gettempdir(), "fungraphtestmultiprocessfixeddir"))
     t = _timenodeonce(fungraph.fun(_slow_add, 2, 2, waitseconds=1), cachedir=cachedir)
     print(t)
     return t
+
 
 class TestFunctionNode(unittest.TestCase):
 
@@ -40,6 +42,7 @@ class TestFunctionNode(unittest.TestCase):
         tothers = [float(check_output(["python", "test_multiprocess.py"])) for _ in range(10)]
         for t2 in tothers:
             self.assertLess(t2, 0.5)
+
 
 if __name__ == '__main__':
     _test_add()
