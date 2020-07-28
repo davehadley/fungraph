@@ -1,4 +1,5 @@
 import hashlib
+from typing import Mapping, Tuple, Any
 
 import cloudpickle
 from dask.callbacks import Callback
