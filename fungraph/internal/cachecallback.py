@@ -12,7 +12,7 @@ class CacheCallback(Callback):
         self._cache = cache
 
     def _start(self, dsk):
-        self._hashes = _dsktohash(dsk)
+        self._hashes = dsktohash(dsk)
         for key in dsk:
             try:
                 dsk[key] = self._cache[self._hashes[key]]
@@ -24,5 +24,5 @@ class CacheCallback(Callback):
         self._cache[self._hashes[key]] = value
 
 
-def _dsktohash(dsk):
+def dsktohash(dsk: Mapping[str, Tuple[Any, ...]]) -> Mapping[str, str]:
     return {k: hashlib.md5(cloudpickle.dumps(dsk[k])).hexdigest() for k in dsk.keys()}
