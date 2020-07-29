@@ -18,7 +18,7 @@ setup(name="fungraph",
       author_email="d.r.hadley@warwick.ac.uk",
       license="MIT",
       packages=["fungraph", "fungraph.internal"],
-      install_requires=["dask>=2.20.0", "cloudpickle>=1.4.1", "filelock>=3.0.12", "toolz>=0.10.0", "distributed>=2.20.0", ],
+      install_requires=["dask>=2.20.0", "cloudpickle>=1.4.1", "filelock>=3.0.12", "toolz>=0.10.0", "distributed>=2.20.0", "joblib>=0.14.1"],
       zip_safe=True,
       classifiers=[
           "Programming Language :: Python :: 3 :: Only",

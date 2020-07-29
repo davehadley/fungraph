@@ -10,3 +10,12 @@ Features include:
 * [dask](https://dask.org/ "Dask") provides delayed functions. As all functions are dask.delayed, you can use dask features to scale computation (eg across a HPC cluster).
 
 See the documentation at <https://fungraph.readthedocs.io>.
+
+## Installation
+
+The package is distributed via PyPi at <https://pypi.org/project/fungraph/>.
+Install from the command line with:
+
+```bash
+pip install fungraph
+```

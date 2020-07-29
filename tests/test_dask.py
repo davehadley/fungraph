@@ -1,10 +1,10 @@
 import operator
+import random
 import time
 import unittest
 
 import dask.distributed
 from dask import delayed
-import numpy as np
 
 import fungraph
 from tests.utils import timeonce
@@ -39,11 +39,11 @@ class TestDask(unittest.TestCase):
         with dask.distributed.Client(address=cluster):
             def slowfunc(loc):
                 time.sleep(1)
-                return np.random.normal(loc)
+                return random.gauss(loc, 1.0)
 
             N = 8
-            args = [fungraph.fun(slowfunc, np.random.uniform()) for _ in range(N)]
-            jobs = fungraph.fun(lambda *args: np.sum(args), *args)
+            args = [fungraph.fun(slowfunc, random.uniform(0.0, 1.0)) for _ in range(N)]
+            jobs = fungraph.fun(lambda *args: sum(args), *args)
             t1 = timeonce(lambda: slowfunc(1.0))
             tn = timeonce(jobs.cachedcompute)
             self.assertLess(tn, (t1 * N) / 2.0)
