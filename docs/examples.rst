@@ -58,6 +58,7 @@ Automatic Caching
 -----------------
 
 :py:mod:`fungraph` results and intermediate values are automatically cached.
+The results are cached to disk by default, with a similar method to `graphchain <https://pypi.org/project/graphchain/>`_.
 If the default caching method is not suitable for your use case (or you simply don't want to cache the results)
 you may evaluate the results with :py:meth:`fungraph.functionnode.FunctionNode.compute`.
 
