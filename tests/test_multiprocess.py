@@ -9,9 +9,9 @@ import fungraph
 from tests.utils import timeonce
 
 
-def _slow_add(a, b, waitseconds=1):
+def _slow_add(x, y, waitseconds=1):
     time.sleep(waitseconds)
-    return a + b
+    return x + y
 
 
 def _timenodeonce(node, cachedir):
@@ -20,7 +20,10 @@ def _timenodeonce(node, cachedir):
 
 def _test_add():
     cachedir = os.sep.join((tempfile.gettempdir(), "fungraphtestmultiprocessfixeddir"))
-    t = _timenodeonce(fungraph.fun(_slow_add, 2, 2, waitseconds=1), cachedir=cachedir)
+    t = _timenodeonce(fungraph.fun(_slow_add,
+                              x=fungraph.fun(lambda: 2),
+                              y=fungraph.fun(lambda: 3),
+                              ), cachedir=cachedir)
     print(t)
     return t
 
@@ -29,7 +32,7 @@ class TestFunctionNode(unittest.TestCase):
 
     def test_cache_multiprocessing(self):
         with tempfile.TemporaryDirectory() as cachedir:
-            node = fungraph.fun(_slow_add, 2, 2, waitseconds=1)
+            node = fungraph.fun(_slow_add, x=2, y=3, waitseconds=1)
             t1 = _timenodeonce(node, cachedir)
             with Pool() as p:
                 tothers = p.starmap(_timenodeonce, [(node.clone(), cachedir) for _ in range(10)])
@@ -39,7 +42,7 @@ class TestFunctionNode(unittest.TestCase):
 
     def test_cache_shell(self):
         t1 = _test_add()
-        tothers = [float(check_output(["python", "test_multiprocess.py"])) for _ in range(10)]
+        tothers = [float(check_output(["python", "test_multiprocess.py"]).splitlines()[-1]) for _ in range(10)]
         for t2 in tothers:
             self.assertLess(t2, 0.5)
 
