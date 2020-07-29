@@ -5,3 +5,4 @@ distributed>=2.20.0
 cloudpickle>=1.4.1
 toolz>=0.10.0
 filelock>=3.0.12
+joblib>=0.14.1
