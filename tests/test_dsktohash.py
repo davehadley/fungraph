@@ -3,7 +3,7 @@ import unittest
 from dask.base import unpack_collections, collections_to_dsk
 
 import fungraph
-from fungraph.internal.cachecallback import dsktohash
+from fungraph.internal.dsktohash import dsktohash
 
 
 def _add_xy(x, y):
