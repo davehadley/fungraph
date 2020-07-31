@@ -50,7 +50,7 @@ class _HashDaskGraph:
         return md5.hexdigest()
 
     def _md5hashpickle(self, obj: Any) -> str:
-        return hashlib.md5(cloudpickle.dumps(obj)).hexdigest()
+        return joblib.hash(obj)
 
     def _get_callable_src(self, c):
         return joblib.func_inspect.get_func_code(c)[0]
