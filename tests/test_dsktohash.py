@@ -118,6 +118,7 @@ class TestDskToHash(unittest.TestCase):
                     second = tryhash(type)
                     self.assertEqual(set(first.values()), set(second.values()))
 
+    @unittest.expectedFailure
     def test_stable_repeated_iterations_multiprocess(self):
         for type in _typerange():
             with self.subTest(type=type):
