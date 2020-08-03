@@ -64,8 +64,8 @@ class TestDask(unittest.TestCase):
             jobs = fungraph.fun(lambda *args: sum(args), *args)
             with TemporaryDirectory() as d:
                 with fungraph.cachecontext(d):
-                    t1 = timeonce(jobs.cachedcompute)
-                    t2 = timeonce(jobs.cachedcompute)
+                    t1 = timeonce(jobs.compute)
+                    t2 = timeonce(jobs.compute)
             self.assertGreater(t1, 1.0)
             self.assertLess(t2, 0.5)
 
