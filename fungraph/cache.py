@@ -1,8 +1,9 @@
-from typing import Union, Mapping, Any
+from typing import Union, Mapping, Any, Optional, Iterable
 
+import dask
 from dask.callbacks import Callback
 
-from fungraph.internal.cachecallback import CacheCallback
+from fungraph.internal.delayedoptimize import delayedoptimize
 from fungraph.internal.lockedcache import LockedCache
 
 DEFAULT_CACHE_PATH = ".fungraphcache"
@@ -30,6 +31,7 @@ def cachecontext(cache: Union[str, Mapping[str, Any], None] = DEFAULT_CACHE_PATH
         return Callback()
     if isinstance(cache, str):
         cache = LockedCache(cache)
-    return CacheCallback(cache)
+    return dask.config.set(delayed_optimize=delayedoptimize(cache=cache))
+
 
 
