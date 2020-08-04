@@ -13,9 +13,9 @@ def delayedoptimize(dsk: Mapping[str, Any], keys: Optional[Union[str, Iterable[s
     hashes = dsktohash(dsk)
     result = {}
     for key in dsk:
-        try:
-            result[key] = cache[hashes[key]]
-        except KeyError:
+        if hashes[key] in cache:
+            result[key] = (lambda k: cache[k], hashes[key])
+        else:
             c = dsk[key]
             if dask.istask(c):
                 result[key] = (CacheAfterExecution(c[0], cache, hashes[key]),) + c[1:]
