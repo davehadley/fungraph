@@ -1,8 +1,10 @@
 from typing import Callable, Mapping, Any
 
+from fungraph.cacheabc import Cache
+
 
 class CacheAfterExecution():
-    def __init__(self, f: Callable, cache: Mapping[str, Any], hash: str):
+    def __init__(self, f: Callable, cache: Cache, hash: str):
         self._cache = cache
         self._hash = hash
         self._f = f

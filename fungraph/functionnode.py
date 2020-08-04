@@ -8,6 +8,7 @@ from dask import delayed
 from dask.delayed import Delayed
 
 from fungraph.cache import DEFAULT_CACHE_PATH, cachecontext
+from fungraph.cacheabc import Cache
 from fungraph.internal import scan
 from fungraph.internal.util import rsplitornone, splitornone, toint, call_if_arg_not_none
 from fungraph.keywordargument import KeywordArgument
@@ -202,7 +203,7 @@ class FunctionNode:
         result = delayed(self.f)(*args, **kwargs)
         return result
 
-    def __call__(self, cache: Union[str, Mapping[str, Any], None] = DEFAULT_CACHE_PATH):
+    def __call__(self, cache: Union[str, Cache, None] = DEFAULT_CACHE_PATH):
         """An alias for `cachedcompute`.
 
         See Also
@@ -229,7 +230,7 @@ class FunctionNode:
         """
         return self.todelayed().compute(*args, **kwargs)
 
-    def cachedcompute(self, cache: Union[str, Mapping[str, Any], None] = DEFAULT_CACHE_PATH) -> Any:
+    def cachedcompute(self, cache: Union[str, Cache, None] = DEFAULT_CACHE_PATH) -> Any:
         """Evaluate this function (and any dependencies).
 
                 By default caches results.
