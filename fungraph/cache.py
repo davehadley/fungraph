@@ -1,15 +1,15 @@
-from typing import Union, Mapping, Any, Optional, Iterable
+from typing import Union
 
 import dask
 from dask.callbacks import Callback
 
+from fungraph.cacheabc import Cache
 from fungraph.internal.delayedoptimize import delayedoptimize
 from fungraph.internal.lockedcache import LockedCache
 
 DEFAULT_CACHE_PATH = ".fungraphcache"
 
-
-def cachecontext(cache: Union[str, Mapping[str, Any], None] = DEFAULT_CACHE_PATH) -> Callback:
+def cachecontext(cache: Union[str, Cache, None] = DEFAULT_CACHE_PATH) -> Callback:
     """Enables automatic caching of function node results and values.
 
     Parameters
