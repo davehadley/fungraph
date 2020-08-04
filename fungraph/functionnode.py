@@ -237,7 +237,7 @@ class FunctionNode:
 
                 Parameter
                 ---------
-                cache : Union[str, Mapping[str, Any], None]
+                cache : Union[str, Cache, None]
                     passed to `fungraph.cachecontext` to enable automatic caching.
 
                 See Also

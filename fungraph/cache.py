@@ -14,11 +14,11 @@ def cachecontext(cache: Union[str, Cache, None] = DEFAULT_CACHE_PATH) -> Callbac
 
     Parameters
     ----------
-    cache: Union[str, Mapping[str, Any], None]
+    cache: Union[str, Cache, None]
         If `str` caches to the file system to a directory corresponding to this string. If the directory does not
         exist it is created.
-        If Mapping[str, Any] is provided this object is used as the storage for the cache instead of the default filesystem
-        method. For example, a standard dict would provide caching to memory.
+        If Cache is provided this object is used as the storage for the cache instead of the default filesystem
+        method.
         If `None`, no caching is enabled.
 
     Returns
