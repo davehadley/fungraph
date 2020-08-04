@@ -3,32 +3,13 @@ import time
 import unittest
 
 import fungraph
+from fungraph.internal.memorycache import MemoryCache
 from tests.utils import timeonce
 
 
 def _slow_func(*args, seconds=1):
     time.sleep(seconds)
     return args
-
-
-class MemoryCache:
-    def __init__(self):
-        self._dict = dict()
-
-    def __getitem__(self, key):
-        return self._dict[key]
-
-    def __setitem__(self, key, value):
-        self._dict[key] = value
-
-    def values(self):
-        return self._dict.values()
-
-    def keys(self):
-        return self._dict.keys()
-
-    def items(self):
-        return self._dict.items()
 
 
 class TestFunctionNodeWithAlternativeCache(unittest.TestCase):
