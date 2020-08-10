@@ -51,8 +51,8 @@ class TestFunctionNode(unittest.TestCase):
         with tempfile.TemporaryDirectory() as cachedir:
             node = fungraph.fun(_slow_add, x=2, y=3, waitseconds=1)
             t1 = _timenodeonce(node, cachedir)
-            with Pool(1) as p:
-                tothers = p.starmap(_timenodeonce, [(node.clone(), cachedir) for _ in range(2)])
+            with Pool() as p:
+                tothers = p.starmap(_timenodeonce, [(node.clone(), cachedir) for _ in range(10)])
             self.assertGreater(t1, 0.5)
             for t2 in tothers:
                 self.assertLess(t2, 0.5)
