@@ -13,4 +13,4 @@ class TestExamples(unittest.TestCase):
 
     def test_examples_run(self):
         for fname in self.iterexamples():
-            subprocess.check_call(["python3", fname])
+            subprocess.check_call(["python", fname])

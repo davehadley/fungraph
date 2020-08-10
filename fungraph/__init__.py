@@ -18,10 +18,10 @@ __author__ = "David Hadley"
 
 url = "https://github.com/davehadley/fungraph"
 
-from fungraph.cache import cachecontext
+from fungraph.cache import cachecontext, Cache
 from fungraph import error
 from fungraph.keywordargument import KeywordArgument
 from fungraph.name import Name
-from fungraph.nodefactory import fun, named, just
+from fungraph.nodefactory import fun, named
 
-__all__ = ["fun", "named", "just", "Name", "KeywordArgument", "error", "cachecontext"]
+__all__ = ["fun", "named", "Name", "KeywordArgument", "error", "cachecontext", "Cache"]

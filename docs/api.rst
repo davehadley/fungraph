@@ -37,4 +37,3 @@ Utilities
 
 .. autoclass:: fungraph.KeywordArgument
 
-.. autofunction:: fungraph.just

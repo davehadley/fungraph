@@ -12,10 +12,8 @@ class CacheCallback(Callback):
     def _start(self, dsk):
         self._hashes = dsktohash(dsk)
         for key in dsk:
-            try:
-                dsk[key] = self._cache[self._hashes[key]]
-            except KeyError:
-                pass
+            if self._hashes[key] in self._cache:
+                dsk[key] = (lambda k: self._cache[k], self._hashes[key])
         return
 
     def _posttask(self, key, value, dsk, state, id):

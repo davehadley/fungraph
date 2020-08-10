@@ -63,26 +63,3 @@ def _maybenamed(name: Optional[str], f: Callable[..., Any], *args: Any, **kwargs
         return fun(f, *args, **kwargs)
 
 
-def just(value: Any, name: Optional[str] = None) -> AnyNode:
-    """Create a function node with no arguments that, when evaluated, returns the given value.
-
-            Parameters
-            ----------
-            value : Any
-                The value to be returned when this fungraph node is evaluated.
-            name : Optional[str]
-                If given, a named node is returned.
-
-            Returns
-            -------
-            fungraph.functionnode.FunctionNode or fungraph.namedfunctionnode.NamedFunctionNode
-                Resulting fungraph node.
-
-            See Also
-            --------
-            fungraph.fun
-        """
-    def justvalue() -> Any:
-        return value
-
-    return _maybenamed(name, justvalue)
