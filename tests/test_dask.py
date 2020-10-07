@@ -12,7 +12,6 @@ from tests.utils import timeonce
 
 
 class TestDask(unittest.TestCase):
-
     def test_delayed_function(self):
         node = fungraph.fun(delayed(operator.add), 2, 3)
         self.assertEqual(node.cachedcompute(), 5)
@@ -26,18 +25,19 @@ class TestDask(unittest.TestCase):
         self.assertEqual(node.cachedcompute(), 5)
 
     def test_nested_delayed_function_and_arguments(self):
-        node = fungraph.fun(delayed(operator.add),
-                            delayed(operator.mul)(1, 2),
-                            fungraph.fun(operator.mul, 3, delayed(4))
-                            )
+        node = fungraph.fun(
+            delayed(operator.add),
+            delayed(operator.mul)(1, 2),
+            fungraph.fun(operator.mul, 3, delayed(4)),
+        )
         self.assertEqual(node.cachedcompute(), 14)
 
     def test_paralell(self):
-        cluster = dask.distributed.LocalCluster(n_workers=8,
-                                                processes=True,
-                                                threads_per_worker=1,
-                                                memory_limit="auto")
+        cluster = dask.distributed.LocalCluster(
+            n_workers=8, processes=True, threads_per_worker=1, memory_limit="auto"
+        )
         with dask.distributed.Client(address=cluster):
+
             def slowfunc(loc):
                 time.sleep(1)
                 return random.gauss(loc, 1.0)
@@ -50,11 +50,11 @@ class TestDask(unittest.TestCase):
             self.assertLess(tn, (t1 * N) / 2.0)
 
     def test_paralell_uses_cache(self):
-        cluster = dask.distributed.LocalCluster(n_workers=8,
-                                                processes=True,
-                                                threads_per_worker=1,
-                                                memory_limit="auto")
+        cluster = dask.distributed.LocalCluster(
+            n_workers=8, processes=True, threads_per_worker=1, memory_limit="auto"
+        )
         with dask.distributed.Client(address=cluster):
+
             def slowfunc(loc):
                 time.sleep(1)
                 return random.gauss(loc, 1.0)

@@ -3,8 +3,8 @@ import os
 import subprocess
 import unittest
 
-class TestExamples(unittest.TestCase):
 
+class TestExamples(unittest.TestCase):
     def iterexamples(self):
         dirname = os.path.dirname(os.path.abspath(__file__))
         for f in glob.glob(os.sep.join((dirname, "*.py"))):

@@ -2,24 +2,30 @@ import itertools
 from contextlib import suppress
 from copy import deepcopy
 from types import MappingProxyType
-from typing import Callable, Any, Tuple, Optional, Union, Iterator, Mapping
+from typing import Any, Callable, Iterator, Mapping, Optional, Tuple, Union
 
 from dask import delayed
 from dask.delayed import Delayed
 
 from fungraph.cache import DEFAULT_CACHE_PATH, cachecontext
 from fungraph.cacheabc import Cache
+from fungraph.error import InvalidFunctionError
 from fungraph.internal import scan
-from fungraph.internal.util import rsplitornone, splitornone, toint, call_if_arg_not_none
+from fungraph.internal.util import (
+    call_if_arg_not_none,
+    rsplitornone,
+    splitornone,
+    toint,
+)
 from fungraph.keywordargument import KeywordArgument
 from fungraph.name import Name
-from fungraph.error import InvalidFunctionError
 
 
 class FunctionNode:
     """Represents a node in a graph of delayed functions.
 
-    May be composed with other nodes to build up a graph. See :ref:`examples` of how to do this.
+    May be composed with other nodes to build up a graph.
+    See :ref:`examples` of how to do this.
     Do not directly call this constructor directly. Use `fungraph.fun` instead.
 
     See Also
@@ -28,6 +34,7 @@ class FunctionNode:
     :ref:`examples`
 
     """
+
     def __init__(self, f: Callable[..., Any], *args: Any, **kwargs: Any):
         if not callable(f):
             raise InvalidFunctionError("function node given a non-callable object", f)
@@ -36,7 +43,7 @@ class FunctionNode:
         self._kwargs = dict(kwargs)
 
     @property
-    def args(self) -> Tuple[Any]:
+    def args(self) -> Tuple[Any, ...]:
         """The positional arguments provided to this function."""
         return tuple(self._args)
 
@@ -92,23 +99,36 @@ class FunctionNode:
             wrapper = call_if_arg_not_none(KeywordArgument)
             key = key.value
         else:
+
             def wrapper(o):
                 return o
+
         split = rsplitornone if reverse else splitornone
         lhs, rhs = map(toint, split(key))
         return wrapper(lhs), wrapper(rhs)
 
-    def _justgetone(self, key: Union[str, int, Name, KeywordArgument], recursive: bool = False) -> Any:
+    def _justgetone(
+        self, key: Union[str, int, Name, KeywordArgument], recursive: bool = False
+    ) -> Any:
         try:
             return next(self._justget(key, recursive=recursive))
         except StopIteration:
             raise KeyError(f"no item {key} in {self}")
 
-    def _justget(self, key: Union[str, int, Name, KeywordArgument], recursive: bool = False) -> Iterator[Any]:
+    def _justget(
+        self, key: Union[str, int, Name, KeywordArgument], recursive: bool = False
+    ) -> Iterator[Any]:
         try:
-            yield from self._getarg(key if not isinstance(key, KeywordArgument) else key.value)
+            yield from self._getarg(
+                key
+                if not isinstance(key, KeywordArgument)
+                else key.value  # type: ignore
+            )
         except (KeyError, IndexError):
-            yield from self._getnamed(key if not isinstance(key, Name) else key.value, recursive=recursive)
+            yield from self._getnamed(
+                key if not isinstance(key, Name) else key.value,  # type: ignore
+                recursive=recursive,
+            )
 
     def set(self, key: Union[str, int, Name, KeywordArgument], value: Any) -> None:
         """Set a parameter of this function (or other function node in the graph).
@@ -127,43 +147,61 @@ class FunctionNode:
         for n in node:
             n._justset(key, value)
 
-    def _justsetone(self, key: Union[str, int, Name, KeywordArgument], value: Any) -> None:
+    def _justsetone(
+        self, key: Union[str, int, Name, KeywordArgument], value: Any
+    ) -> None:
         return self._justset(key, value, recursive=False)
 
-    def _justset(self, key: Union[str, int, Name, KeywordArgument], value: Any, recursive: bool = True) -> None:
+    def _justset(
+        self,
+        key: Union[str, int, Name, KeywordArgument],
+        value: Any,
+        recursive: bool = True,
+    ) -> None:
         try:
-            return self._setarg(key if not isinstance(key, KeywordArgument) else key.value, value)
+            return self._setarg(
+                key
+                if not isinstance(key, KeywordArgument)
+                else key.value,  # type: ignore
+                value,
+            )
         except (KeyError, IndexError):
-            return self._setnamed(key if not isinstance(key, Name) else key.value, value, recursive=recursive)
+            return self._setnamed(
+                key if not isinstance(key, Name) else key.value,  # type: ignore
+                value,
+                recursive=recursive,
+            )
 
     def _getarg(self, key: Union[str, int]) -> Iterator[Any]:
         try:
-            yield self._args[key]
+            yield self._args[key]  # type: ignore
         except TypeError:
             try:
-                yield self._kwargs[key]
+                yield self._kwargs[key]  # type: ignore
             except KeyError:
                 raise KeyError(f"{self} has no argument {key}")
 
     def _setarg(self, key: Union[str, int], value: Any):
         try:
-            self._args[key] = value
+            self._args[key] = value  # type: ignore
             return
         except TypeError:
             if key in self._kwargs:
-                self._kwargs[key] = value
+                self._kwargs[key] = value  # type: ignore
                 return
         raise KeyError(f"{self} has no argument {key}")
 
     def _iterchildnodes(self) -> Iterator[Tuple[Union[str, int], "FunctionNode"]]:
-        return ((k, n) for k, n in itertools.chain(enumerate(self.args), self.kwargs.items())
-                if isinstance(n, FunctionNode)
-                )
+        return (
+            (k, n)
+            for k, n in itertools.chain(enumerate(self.args), self.kwargs.items())
+            if isinstance(n, FunctionNode)
+        )
 
     def _getnamed(self, name: str, recursive: bool = True) -> "Iterator[FunctionNode]":
         for _, a in self._iterchildnodes():
             with suppress(Exception):
-                if name == a.name:
+                if name == a.name:  # type: ignore
                     yield a
         if recursive:
             for _, a in self._iterchildnodes():
@@ -174,7 +212,7 @@ class FunctionNode:
         found = False
         for index, a in self._iterchildnodes():
             with suppress(Exception):
-                if name == a.name:
+                if name == a.name:  # type: ignore
                     found = True
                     self[index] = value
                     if not recursive:
@@ -185,7 +223,7 @@ class FunctionNode:
                     a._setnamed(name, value, recursive=recursive)
                     found = True
         if not found:
-            raise KeyError(f"{self} does not contain \"{name}\"")
+            raise KeyError(f'{self} does not contain "{name}"')
 
     def todelayed(self) -> Delayed:
         """Convert this function node to a dask delayed object."""
@@ -194,7 +232,6 @@ class FunctionNode:
             if isinstance(a, FunctionNode):
                 a = a.todelayed()
             args.append(a)
-        args = tuple(args)
         kwargs = {}
         for key, a in self.kwargs.items():
             if isinstance(a, FunctionNode):
@@ -233,28 +270,30 @@ class FunctionNode:
     def cachedcompute(self, cache: Union[str, Cache, None] = DEFAULT_CACHE_PATH) -> Any:
         """Evaluate this function (and any dependencies).
 
-                By default caches results.
+        By default caches results.
 
-                Parameter
-                ---------
-                cache : Union[str, Cache, None]
-                    passed to `fungraph.cachecontext` to enable automatic caching.
+        Parameter
+        ---------
+        cache : Union[str, Cache, None]
+            passed to `fungraph.cachecontext` to enable automatic caching.
 
-                See Also
-                --------
-                fungraph.cachecontext
-                """
+        See Also
+        --------
+        fungraph.cachecontext
+        """
         with cachecontext(cache):
             return self.todelayed().compute()
 
     def __repr__(self):
         return f"FunctionNode({self._funcname}, args={self.args}, kwargs={self.kwargs})"
 
-    def clone(self) -> "fungraph.functionnode.FunctionNode":
+    def clone(self) -> "FunctionNode":
         """Make a deep copy of this function graph."""
         return deepcopy(self)
 
-    def scan(self, arguments: Mapping[str, Any], name: Optional[str] = None) -> "fungraph.functionnode.FunctionNode":
+    def scan(
+        self, arguments: Mapping[str, Any], name: Optional[str] = None
+    ) -> "FunctionNode":
         """Reproduce this graph with the provided arguments modified.
 
         Parameters
@@ -265,7 +304,8 @@ class FunctionNode:
         Returns
         -------
         listofresults : fungraph.functionnode.FunctionNode
-            a function node that when evaluated returns a tuple of the results with the modified parameter values.
+            a function node that when evaluated returns a tuple of the results with
+            the modified parameter values.
         """
         return scan.scan(self, arguments, name)
 

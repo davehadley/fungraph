@@ -1,5 +1,5 @@
 import timeit
-from typing import Callable, Any
+from typing import Any, Callable
 
 
 def timeonce(f: Callable[[], Any]) -> float:

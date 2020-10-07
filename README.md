@@ -1,4 +1,10 @@
 # fungraph
+ 
+[![Travis (.org) branch](https://img.shields.io/travis/davehadley/fungraph)](https://travis-ci.org/davehadley/fungraph)
+[![Documentation Status](https://readthedocs.org/projects/fungraph/badge/?version=latest)](https://fungraph.readthedocs.io/en/latest/?badge=latest)
+[![PyPI](https://img.shields.io/pypi/v/fungraph)](https://pypi.org/project/fungraph/)
+[![License: MIT](https://img.shields.io/pypi/l/fungraph)](https://github.com/davehadley/fungraph/blob/master/LICENSE)
+[![Last Commit](https://img.shields.io/github/last-commit/davehadley/fungraph/dev)](https://github.com/davehadley/fungraph)
 
 Lazily evaluated mutable graph of functions with automatically cached intermediate values. 
 
@@ -19,3 +25,7 @@ Install from the command line with:
 ```bash
 pip install fungraph
 ```
+
+## Developer Instructions
+
+After clone, run the shell script `post-clone.sh` which installs required pre-commit hooks.

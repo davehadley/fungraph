@@ -1,21 +1,22 @@
-import fungraph
 import operator
 
-if __name__ == '__main__':
+import fungraph
+
+if __name__ == "__main__":
     f = fungraph.fun(operator.add, 2, 2)
 
-    f() # uses default caching
-    f.cachedcompute() # equivalent to the above line
+    f()  # uses default caching
+    f.cachedcompute()  # equivalent to the above line
 
     f.compute()  # run the computation without any cache
 
     # manually use the default caching method
-    with fungraph.cachecontext(): # this line could be replaced with an alternative user provided caching context
+    # this could be replaced with an alternative user provided caching context
+    with fungraph.cachecontext():
         f.compute()
 
     # replace the default local disk store with a custom cache.
     class MemoryCache(fungraph.Cache):
-
         def __init__(self):
             self.dict = dict()
 
@@ -31,5 +32,4 @@ if __name__ == '__main__':
     memorycache = MemoryCache()
     with fungraph.cachecontext(cache=memorycache):
         f.compute()
-    print(memorycache.dict) # prints: {'bd9a1aa4150cc393207a60e4a06dcac7': 4}
-
+    print(memorycache.dict)  # prints: {'bd9a1aa4150cc393207a60e4a06dcac7': 4}
