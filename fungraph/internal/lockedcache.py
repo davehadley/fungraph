@@ -8,7 +8,6 @@ from fungraph.cacheabc import Cache
 
 
 class LockedCache(Cache):
-
     def __init__(self, dirname: str, timeout=120):
         self._timeout = timeout
         os.makedirs(dirname, exist_ok=True)

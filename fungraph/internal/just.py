@@ -1,27 +1,29 @@
 from typing import Any, Optional
 
-from fungraph.nodefactory import AnyNode, named, fun
+from fungraph.nodefactory import AnyNode, fun, named
 
 
 def just(value: Any, name: Optional[str] = None) -> AnyNode:
-    """Create a function node with no arguments that, when evaluated, returns the given value.
+    """Create a function node with no arguments that, when evaluated, returns the
+    given value.
 
-            Parameters
-            ----------
-            value : Any
-                The value to be returned when this fungraph node is evaluated.
-            name : Optional[str]
-                If given, a named node is returned.
+    Parameters
+    ----------
+    value : Any
+        The value to be returned when this fungraph node is evaluated.
+    name : Optional[str]
+        If given, a named node is returned.
 
-            Returns
-            -------
-            fungraph.functionnode.FunctionNode or fungraph.namedfunctionnode.NamedFunctionNode
-                Resulting fungraph node.
+    Returns
+    -------
+    fungraph.functionnode.FunctionNode or fungraph.namedfunctionnode.NamedFunctionNode
+        Resulting fungraph node.
 
-            See Also
-            --------
-            fungraph.fun
-        """
+    See Also
+    --------
+    fungraph.fun
+    """
+
     def justvalue(localvalue=value) -> Any:
         return localvalue
 

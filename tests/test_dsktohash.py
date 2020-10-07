@@ -1,9 +1,9 @@
 import unittest
 from argparse import ArgumentParser
 from subprocess import check_output
-from typing import NamedTuple, Any
+from typing import Any, NamedTuple
 
-from dask.base import unpack_collections, collections_to_dsk
+from dask.base import collections_to_dsk, unpack_collections
 
 import fungraph
 from fungraph.internal.dsktohash import dsktohash
@@ -20,17 +20,19 @@ def _get_dsk(node):
 
 
 def _getsimplenode():
-    return fungraph.fun(_add_xy,
-                        x=fungraph.fun(lambda: 2),
-                        y=fungraph.fun(lambda: 3),
-                        )
+    return fungraph.fun(
+        _add_xy,
+        x=fungraph.fun(lambda: 2),
+        y=fungraph.fun(lambda: 3),
+    )
 
 
 def _getcollectionnode():
-    return fungraph.fun(lambda x, y: (x, y),
-                        [0, 1],
-                        {"a": 1, "b": 2},
-                        )
+    return fungraph.fun(
+        lambda x, y: (x, y),
+        [0, 1],
+        {"a": 1, "b": 2},
+    )
 
 
 class TestNamedTuple1(NamedTuple):
@@ -38,10 +40,11 @@ class TestNamedTuple1(NamedTuple):
 
 
 def _getsimplenamedtuplenode():
-    return fungraph.fun(lambda x, y: (x.a, y.a),
-                        TestNamedTuple1(1),
-                        TestNamedTuple1(2),
-                        )
+    return fungraph.fun(
+        lambda x, y: (x.a, y.a),
+        TestNamedTuple1(1),
+        TestNamedTuple1(2),
+    )
 
 
 class TestNamedTuple2(NamedTuple):
@@ -52,10 +55,11 @@ class TestNamedTuple2(NamedTuple):
 
 
 def _getnamedtuplenode():
-    return fungraph.fun(lambda x, y: (x.a, y.b),
-                        TestNamedTuple2(1, {"a": 2, "b": 3}, [5, 6], "somestring"),
-                        TestNamedTuple2(2, {"a": [7, 8], "b": "B"}, [5, 6], "someotherstring"),
-                        )
+    return fungraph.fun(
+        lambda x, y: (x.a, y.b),
+        TestNamedTuple2(1, {"a": 2, "b": 3}, [5, 6], "somestring"),
+        TestNamedTuple2(2, {"a": [7, 8], "b": "B"}, [5, 6], "someotherstring"),
+    )
 
 
 class TestNamedTuple3(NamedTuple):
@@ -69,10 +73,13 @@ class CompositeNamedTuple3(NamedTuple):
 
 
 def _getcompositenamedtuplenode():
-    return fungraph.fun(lambda x: x,
-                        CompositeNamedTuple3(TestNamedTuple3([1, 2, 3], {"a": 1, "b": 2}),
-                                             TestNamedTuple3([4, 5, 6], {"c": 4, "d": 5}), ),
-                        )
+    return fungraph.fun(
+        lambda x: x,
+        CompositeNamedTuple3(
+            TestNamedTuple3([1, 2, 3], {"a": 1, "b": 2}),
+            TestNamedTuple3([4, 5, 6], {"c": 4, "d": 5}),
+        ),
+    )
 
 
 class A:
@@ -81,20 +88,22 @@ class A:
 
 
 def _getuserdefinedclassnode():
-    return fungraph.fun(lambda x, y: x.a + y.a,
-                        A(1),
-                        A(2),
-                        )
+    return fungraph.fun(
+        lambda x, y: x.a + y.a,
+        A(1),
+        A(2),
+    )
 
 
 def _getnode(type: int):
-    return {0: _getsimplenode(),
-            1: _getcollectionnode(),
-            2: _getsimplenamedtuplenode(),
-            3: _getnamedtuplenode(),
-            4: _getcompositenamedtuplenode(),
-            5: _getuserdefinedclassnode(),
-            }[type]
+    return {
+        0: _getsimplenode(),
+        1: _getcollectionnode(),
+        2: _getsimplenamedtuplenode(),
+        3: _getnamedtuplenode(),
+        4: _getcompositenamedtuplenode(),
+        5: _getuserdefinedclassnode(),
+    }[type]
 
 
 def _typerange():
@@ -106,10 +115,10 @@ def _simplehash(type: int):
 
 
 class TestDskToHash(unittest.TestCase):
-
     def test_stable_repeated_iterations(self):
         for type in _typerange():
             with self.subTest(type=type):
+
                 def tryhash(type=type):
                     return dsktohash(_get_dsk(_getnode(type=type)))
 
@@ -122,13 +131,19 @@ class TestDskToHash(unittest.TestCase):
     def test_stable_repeated_iterations_multiprocess(self):
         for type in _typerange():
             with self.subTest(type=type):
-                tothers = [eval(check_output(["python", "test_dsktohash.py", str(type)]).splitlines()[-1]) for _ in
-                           range(3)]
+                tothers = [
+                    eval(
+                        check_output(
+                            ["python", "test_dsktohash.py", str(type)]
+                        ).splitlines()[-1]
+                    )
+                    for _ in range(3)
+                ]
                 for t2 in tothers:
                     self.assertEqual(set(t2.values()), set(_simplehash(type).values()))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("type", type=int, default=0)
     args = parser.parse_args()

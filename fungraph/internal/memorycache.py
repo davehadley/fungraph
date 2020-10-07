@@ -2,7 +2,6 @@ from fungraph.cacheabc import Cache
 
 
 class MemoryCache(Cache):
-
     def __init__(self):
         self._dict = dict()
 

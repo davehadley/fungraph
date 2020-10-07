@@ -4,7 +4,6 @@ from fungraph.internal.dsktohash import dsktohash
 
 
 class CacheCallback(Callback):
-
     def __init__(self, cache):
         super().__init__()
         self._cache = cache

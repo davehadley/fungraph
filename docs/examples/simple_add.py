@@ -1,6 +1,7 @@
-import fungraph
 import operator
 
-if __name__ == '__main__':
+import fungraph
+
+if __name__ == "__main__":
     f = fungraph.fun(operator.add, 1, 2)
-    print(f()) # prints 3
+    print(f())  # prints 3

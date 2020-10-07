@@ -26,7 +26,6 @@ def _mul_xy(x: int, y: int):
 
 
 class TestFunctionNode(unittest.TestCase):
-
     def test_constructor(self):
         f = fungraph.fun(lambda: None)
         self.assertIsNone(f.cachedcompute())
@@ -36,10 +35,11 @@ class TestFunctionNode(unittest.TestCase):
         self.assertEqual(result, 5)
 
     def test_node_arguments(self):
-        result = fungraph.fun(operator.add,
-                              fungraph.fun(lambda: 2),
-                              fungraph.fun(lambda: 3),
-                              ).cachedcompute()
+        result = fungraph.fun(
+            operator.add,
+            fungraph.fun(lambda: 2),
+            fungraph.fun(lambda: 3),
+        ).cachedcompute()
         self.assertEqual(result, 5)
 
     def test_integer_keywordarguments(self):
@@ -47,17 +47,19 @@ class TestFunctionNode(unittest.TestCase):
         self.assertEqual(result, 5)
 
     def test_node_keywordarguments(self):
-        result = fungraph.fun(_add_xy,
-                              x=fungraph.fun(lambda: 2),
-                              y=fungraph.fun(lambda: 3),
-                              ).cachedcompute()
+        result = fungraph.fun(
+            _add_xy,
+            x=fungraph.fun(lambda: 2),
+            y=fungraph.fun(lambda: 3),
+        ).cachedcompute()
         self.assertEqual(result, 5)
 
     def test_path_arguments(self):
-        node = fungraph.fun(_add_xy,
-                            fungraph.fun(_mul_xy, 1, 2),
-                            fungraph.fun(_mul_xy, 3, 4),
-                            )
+        node = fungraph.fun(
+            _add_xy,
+            fungraph.fun(_mul_xy, 1, 2),
+            fungraph.fun(_mul_xy, 3, 4),
+        )
         self.assertEqual(node[0][0], 1)
         self.assertEqual(node[0][1], 2)
         self.assertEqual(node[1][0], 3)
@@ -68,10 +70,11 @@ class TestFunctionNode(unittest.TestCase):
         self.assertEqual(node["1/1"], 4)
 
     def test_path_kwarguments(self):
-        node = fungraph.fun(_add_xy,
-                            x=fungraph.fun(_mul_xy, x=1, y=2),
-                            y=fungraph.fun(_mul_xy, x=3, y=4),
-                            )
+        node = fungraph.fun(
+            _add_xy,
+            x=fungraph.fun(_mul_xy, x=1, y=2),
+            y=fungraph.fun(_mul_xy, x=3, y=4),
+        )
         self.assertEqual(node["x"]["x"], 1)
         self.assertEqual(node["x"]["y"], 2)
         self.assertEqual(node["y"]["x"], 3)
@@ -86,10 +89,11 @@ class TestFunctionNode(unittest.TestCase):
         self.assertEqual(result, 5)
 
     def test_node_mixedarguments(self):
-        result = fungraph.fun(_add_xy,
-                              fungraph.fun(lambda: 2),
-                              y=fungraph.fun(lambda: 3),
-                              ).cachedcompute()
+        result = fungraph.fun(
+            _add_xy,
+            fungraph.fun(lambda: 2),
+            y=fungraph.fun(lambda: 3),
+        ).cachedcompute()
         self.assertEqual(result, 5)
 
     def test_cache(self):
@@ -117,10 +121,11 @@ class TestFunctionNode(unittest.TestCase):
         node1 = fungraph.fun(_slow_identity, 5, waitseconds=1)
         f1 = lambda: node1.cachedcompute(cache=cachedir)
         t1 = timeonce(f1)
-        node2 = fungraph.fun(operator.add,
-                             fungraph.fun(_slow_identity, 5, waitseconds=1),
-                             fungraph.fun(_slow_identity, 5, waitseconds=1)
-                             )
+        node2 = fungraph.fun(
+            operator.add,
+            fungraph.fun(_slow_identity, 5, waitseconds=1),
+            fungraph.fun(_slow_identity, 5, waitseconds=1),
+        )
         f2 = lambda: node2.cachedcompute(cache=cachedir)
         t2 = timeonce(f2)
         self.assertGreater(t1, 0.5)
@@ -153,10 +158,11 @@ class TestFunctionNode(unittest.TestCase):
         self.assertEqual(result2, 6)
 
     def test_modify_nodearguments(self):
-        node = fungraph.fun(operator.add,
-                            fungraph.fun(lambda: 2),
-                            fungraph.fun(lambda: 3)
-                            )
+        node = fungraph.fun(
+            operator.add,
+            fungraph.fun(lambda: 2),
+            fungraph.fun(lambda: 3),
+        )
         result1 = node.cachedcompute()
         node[1] = fungraph.fun(lambda: 4)
         result2 = node.cachedcompute()
@@ -164,10 +170,11 @@ class TestFunctionNode(unittest.TestCase):
         self.assertEqual(result2, 6)
 
     def test_modify_path_arguments(self):
-        node = fungraph.fun(_add_xy,
-                            fungraph.fun(_mul_xy, 1, y=2),
-                            y=fungraph.fun(_mul_xy, 3, y=4),
-                            )
+        node = fungraph.fun(
+            _add_xy,
+            fungraph.fun(_mul_xy, 1, y=2),
+            y=fungraph.fun(_mul_xy, 3, y=4),
+        )
         node["0/0"] = 10
         node["0/y"] = 20
         node["y/0"] = 30
@@ -229,27 +236,32 @@ class TestFunctionNode(unittest.TestCase):
         self.assertEqual(scan.cachedcompute(), (1, 4, 9, 16))
 
     def test_scan_pathargument(self):
-        node = fungraph.fun(_add_xy,
-                            x=fungraph.fun(_mul_xy, x=1, y=2),
-                            y=fungraph.fun(_mul_xy, x=3, y=4),
-                            )
+        node = fungraph.fun(
+            _add_xy,
+            x=fungraph.fun(_mul_xy, x=1, y=2),
+            y=fungraph.fun(_mul_xy, x=3, y=4),
+        )
         scan = node.scan({"x/x": [1, 2, 3], "y/x": [1, 2, 3]})
         self.assertEqual(node.cachedcompute(), 2 + 3 * 4)
-        self.assertEqual(scan.cachedcompute(), (1 * 2 + 1 * 4, 2 * 2 + 2 * 4, 3 * 2 + 3 * 4))
+        self.assertEqual(
+            scan.cachedcompute(), (1 * 2 + 1 * 4, 2 * 2 + 2 * 4, 3 * 2 + 3 * 4)
+        )
 
     def test_clone(self):
-        node = fungraph.fun(operator.add,
-                            fungraph.fun(lambda: 2),
-                            fungraph.fun(lambda: 3),
-                            )
+        node = fungraph.fun(
+            operator.add,
+            fungraph.fun(lambda: 2),
+            fungraph.fun(lambda: 3),
+        )
         clone = node.clone()
         self.assertEqual(node.cachedcompute(), clone.cachedcompute())
 
     def test_modify_clone(self):
-        node = fungraph.fun(operator.add,
-                            fungraph.fun(lambda: 2),
-                            fungraph.fun(lambda: 3),
-                            )
+        node = fungraph.fun(
+            operator.add,
+            fungraph.fun(lambda: 2),
+            fungraph.fun(lambda: 3),
+        )
         clone = node.clone()
         clone[1] = fungraph.fun(lambda: 4)
         self.assertEqual(node.cachedcompute(), 5)
@@ -257,10 +269,11 @@ class TestFunctionNode(unittest.TestCase):
 
     def test_clone_reuses_cache(self):
         cachedir = tempfile.mkdtemp()
-        node = fungraph.fun(operator.add,
-                            fungraph.fun(_slow_identity, 2, waitseconds=1),
-                            fungraph.fun(_slow_identity, 3, waitseconds=1),
-                            )
+        node = fungraph.fun(
+            operator.add,
+            fungraph.fun(_slow_identity, 2, waitseconds=1),
+            fungraph.fun(_slow_identity, 3, waitseconds=1),
+        )
         clone = node.clone()
         nodefun = lambda: node.cachedcompute(cache=cachedir)
         clonefun = lambda: clone.cachedcompute(cache=cachedir)

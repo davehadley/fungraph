@@ -10,4 +10,5 @@ class Name(NamedTuple):
     --------
     fungraph.KeywordArgument
     """
+
     value: str

@@ -5,7 +5,7 @@ def add(x, y):
     return x + y
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     f = fungraph.fun(add, x=1, y=2)
     # scan 1 parameter
     scan = f.scan({"x": [1, 2, 3]})

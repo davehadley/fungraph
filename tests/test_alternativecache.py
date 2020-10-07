@@ -13,7 +13,6 @@ def _slow_func(*args, seconds=1):
 
 
 class TestFunctionNodeWithAlternativeCache(unittest.TestCase):
-
     def test_cache_compute_dict(self):
         f = fungraph.fun(operator.add, 1, 2)
         cache = MemoryCache()

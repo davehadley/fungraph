@@ -1,7 +1,6 @@
 import hashlib
-from typing import Mapping, Tuple, Any
+from typing import Any, Mapping, Tuple
 
-import cloudpickle
 import dask
 import joblib
 
